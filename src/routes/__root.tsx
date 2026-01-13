@@ -7,7 +7,10 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import * as React from 'react'
+import { useState } from 'react'
 import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
 import { NotFound } from '~/components/NotFound'
 import { UserNav } from '~/components/UserNav'
@@ -55,12 +58,27 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000, // 1 minute
+            refetchOnWindowFocus: false,
+          },
+        },
+      })
+  )
+
   return (
-    <ThemeProvider defaultTheme="system" storageKey="cf-template-theme">
-      <RootDocument>
-        <Outlet />
-      </RootDocument>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system" storageKey="cf-template-theme">
+        <RootDocument>
+          <Outlet />
+        </RootDocument>
+      </ThemeProvider>
+      <ReactQueryDevtools buttonPosition="bottom-left" />
+    </QueryClientProvider>
   )
 }
 
