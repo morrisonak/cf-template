@@ -1,4 +1,5 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
   AlertDialog,
@@ -32,46 +33,126 @@ import {
 } from '~/server/posts'
 
 export const Route = createFileRoute('/posts')({
-  loader: () => getPosts(),
   component: PostsPage,
 })
 
 function PostsPage() {
-  const posts = Route.useLoaderData()
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
+
+  // Fetch posts with useQuery
+  const {
+    data: posts = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['posts'],
+    queryFn: () => getPosts(),
+  })
+
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: (data: { title: string; content?: string }) =>
+      createPost({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      setIsCreating(false)
+    },
+  })
+
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: (data: { id: number; title: string; content?: string }) =>
+      updatePost({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      setEditingId(null)
+    },
+  })
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deletePost({ data: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    await createPost({
-      data: {
-        title: formData.get('title') as string,
-        content: formData.get('content') as string,
-      },
+    createMutation.mutate({
+      title: formData.get('title') as string,
+      content: formData.get('content') as string,
     })
-    setIsCreating(false)
-    router.invalidate()
   }
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>, id: number) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    await updatePost({
-      data: {
-        id,
-        title: formData.get('title') as string,
-        content: formData.get('content') as string,
-      },
+    updateMutation.mutate({
+      id,
+      title: formData.get('title') as string,
+      content: formData.get('content') as string,
     })
-    setEditingId(null)
-    router.invalidate()
   }
 
   const handleDelete = async (id: number) => {
-    await deletePost({ data: id })
-    router.invalidate()
+    deleteMutation.mutate(id)
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Posts</h1>
+          <p className="text-muted-foreground">Loading posts...</p>
+        </div>
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-6 bg-muted rounded w-1/3" />
+                <div className="h-4 bg-muted rounded w-1/4 mt-2" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-2/3 mt-2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Posts</h1>
+          <p className="text-muted-foreground">
+            Full CRUD demo with server functions
+          </p>
+        </div>
+        <Card className="border-destructive">
+          <CardContent className="py-8 text-center">
+            <p className="text-destructive font-medium">Failed to load posts</p>
+            <p className="text-muted-foreground text-sm mt-1">
+              {error instanceof Error ? error.message : 'An error occurred'}
+            </p>
+            <Button variant="outline" className="mt-4" onClick={() => refetch()}>
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -80,7 +161,7 @@ function PostsPage() {
         <div>
           <h1 className="text-3xl font-bold">Posts</h1>
           <p className="text-muted-foreground">
-            Full CRUD demo with server functions
+            Full CRUD demo with TanStack Query
           </p>
         </div>
         {!isCreating && (
@@ -103,6 +184,7 @@ function PostsPage() {
                   name="title"
                   placeholder="Enter post title"
                   required
+                  disabled={createMutation.isPending}
                 />
               </div>
               <div className="space-y-2">
@@ -112,15 +194,24 @@ function PostsPage() {
                   name="content"
                   placeholder="Enter post content"
                   rows={4}
+                  disabled={createMutation.isPending}
                 />
               </div>
+              {createMutation.isError && (
+                <p className="text-sm text-destructive">
+                  Failed to create post. Please try again.
+                </p>
+              )}
             </CardContent>
             <CardFooter className="gap-2">
-              <Button type="submit">Create</Button>
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending ? 'Creating...' : 'Create'}
+              </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsCreating(false)}
+                disabled={createMutation.isPending}
               >
                 Cancel
               </Button>
@@ -142,6 +233,8 @@ function PostsPage() {
               key={post.id}
               post={post}
               isEditing={editingId === post.id}
+              isUpdating={updateMutation.isPending && updateMutation.variables?.id === post.id}
+              isDeleting={deleteMutation.isPending && deleteMutation.variables === post.id}
               onEdit={() => setEditingId(post.id)}
               onCancelEdit={() => setEditingId(null)}
               onUpdate={handleUpdate}
@@ -157,6 +250,8 @@ function PostsPage() {
 function PostCard({
   post,
   isEditing,
+  isUpdating,
+  isDeleting,
   onEdit,
   onCancelEdit,
   onUpdate,
@@ -164,6 +259,8 @@ function PostCard({
 }: {
   post: Post
   isEditing: boolean
+  isUpdating: boolean
+  isDeleting: boolean
   onEdit: () => void
   onCancelEdit: () => void
   onUpdate: (e: React.FormEvent<HTMLFormElement>, id: number) => Promise<void>
@@ -184,6 +281,7 @@ function PostCard({
                 name="title"
                 defaultValue={post.title}
                 required
+                disabled={isUpdating}
               />
             </div>
             <div className="space-y-2">
@@ -193,12 +291,20 @@ function PostCard({
                 name="content"
                 defaultValue={post.content ?? ''}
                 rows={4}
+                disabled={isUpdating}
               />
             </div>
           </CardContent>
           <CardFooter className="gap-2">
-            <Button type="submit">Save</Button>
-            <Button type="button" variant="outline" onClick={onCancelEdit}>
+            <Button type="submit" disabled={isUpdating}>
+              {isUpdating ? 'Saving...' : 'Save'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancelEdit}
+              disabled={isUpdating}
+            >
               Cancel
             </Button>
           </CardFooter>
@@ -208,7 +314,7 @@ function PostCard({
   }
 
   return (
-    <Card>
+    <Card className={isDeleting ? 'opacity-50' : ''}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
@@ -218,13 +324,18 @@ function PostCard({
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onEdit}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onEdit}
+              disabled={isDeleting}
+            >
               Edit
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  Delete
+                <Button variant="destructive" size="sm" disabled={isDeleting}>
+                  {isDeleting ? 'Deleting...' : 'Delete'}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
