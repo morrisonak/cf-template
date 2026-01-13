@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cf-template",
+  "compatibility_date": "2025-01-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true
+  },
+
+  // D1 Database binding
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cf-template-db",
+      "database_id": "375610de-221f-4814-ace1-5b4d71491eb6",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // R2 Storage binding
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "cf-template-bucket"
+    }
+  ],
+
+  // KV Namespace binding
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "c31ac07cf79b4f93a3939d8ee6b59993"
+    }
+  ],
+
+  // Environment variables
+  "vars": {
+    "ENVIRONMENT": "development"
+  }
+}
