@@ -34,7 +34,7 @@ export const createPost = createServerFn({ method: 'POST' })
     const db = getDB()
     const result = await db
       .prepare(
-        'INSERT INTO posts (title, content, user_id) VALUES (?, ?, 1) RETURNING *'
+        'INSERT INTO posts (title, content) VALUES (?, ?) RETURNING *'
       )
       .bind(data.title, data.content ?? null)
       .first<Post>()
