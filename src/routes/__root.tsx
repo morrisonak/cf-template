@@ -22,7 +22,7 @@ import { seo } from '~/utils/seo'
 // Script to prevent flash of unstyled content
 const themeScript = `
   (function() {
-    const stored = localStorage.getItem('cf-template-theme');
+    const stored = localStorage.getItem('metavadvisors-theme');
     const theme = stored || 'system';
     const root = document.documentElement;
 
@@ -38,8 +38,8 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       ...seo({
-        title: 'CF Template | TanStack Start + Cloudflare',
-        description: 'Full-stack template with TanStack Start, Shadcn UI, Cloudflare Workers, D1, and R2',
+        title: 'Meta Advisors | Custom AI Agents for Revenue Growth',
+        description: 'We design and deploy intelligent AI agents tailored to your business. Automate workflows, accelerate revenue, scale with zero technical overhead.',
       }),
     ],
     links: [
@@ -72,7 +72,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="cf-template-theme">
+      <ThemeProvider defaultTheme="system" storageKey="metavadvisors-theme">
         <RootDocument>
           <Outlet />
         </RootDocument>
@@ -90,15 +90,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <nav className="border-b">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between text-sm">
-            <div className="flex gap-4">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link
+              to="/"
+              className="font-bold text-lg hover:text-primary"
+              activeProps={{ className: 'text-primary' }}
+              activeOptions={{ exact: true }}
+            >
+              Meta Advisors
+            </Link>
+            <div className="flex gap-6 text-sm">
               <Link
-                to="/"
-                className="font-semibold hover:text-primary"
+                to="/services"
+                className="hover:text-primary"
                 activeProps={{ className: 'text-primary' }}
-                activeOptions={{ exact: true }}
               >
-                Home
+                Services
               </Link>
               <Link
                 to="/about"
@@ -108,31 +115,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 About
               </Link>
               <Link
-                to="/posts"
+                to="/contact"
                 className="hover:text-primary"
                 activeProps={{ className: 'text-primary' }}
               >
-                Posts
-              </Link>
-              <Link
-                to="/files"
-                className="hover:text-primary"
-                activeProps={{ className: 'text-primary' }}
-              >
-                Files
-              </Link>
-              <Link
-                to="/settings"
-                className="hover:text-primary"
-                activeProps={{ className: 'text-primary' }}
-              >
-                Settings
+                Contact
               </Link>
             </div>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <UserNav />
-            </div>
+            <ThemeToggle />
           </div>
         </nav>
         <main className="container mx-auto px-4 py-8">

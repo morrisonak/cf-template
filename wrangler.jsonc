@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "cf-template",
+  "name": "metavadvisors",
   "compatibility_date": "2025-01-13",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
@@ -12,8 +12,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "cf-template-db",
-      "database_id": "375610de-221f-4814-ace1-5b4d71491eb6",
+      "database_name": "metavadvisors-db",
+      "database_id": "TODO_CREATE_DB",
       "migrations_dir": "migrations"
     }
   ],
@@ -22,7 +22,7 @@
   "r2_buckets": [
     {
       "binding": "BUCKET",
-      "bucket_name": "cf-template-bucket"
+      "bucket_name": "metavadvisors-bucket"
     }
   ],
 
@@ -30,12 +30,13 @@
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "c31ac07cf79b4f93a3939d8ee6b59993"
+      "id": "TODO_CREATE_KV"
     }
   ],
 
   // Environment variables
   "vars": {
-    "ENVIRONMENT": "development"
+    "ENVIRONMENT": "development",
+    "DOMAIN": "metavadvisors.com"
   }
 }
