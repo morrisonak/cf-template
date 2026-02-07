@@ -55,3 +55,28 @@
   --color-input: hsl(240 3.7% 15.9%);
   --color-ring: hsl(240 4.9% 83.9%);
 }
+
+/* Dark mode fixes for colored cards */
+.dark .bg-blue-50 {
+  @apply bg-blue-950/30;
+}
+
+.dark .bg-green-50 {
+  @apply bg-green-950/30;
+}
+
+.dark .bg-purple-50 {
+  @apply bg-purple-950/30;
+}
+
+.dark .bg-orange-50 {
+  @apply bg-orange-950/30;
+}
+
+.dark .bg-yellow-50 {
+  @apply bg-yellow-950/30;
+}
+
+.dark .bg-primary {
+  @apply bg-slate-900;
+}

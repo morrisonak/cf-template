@@ -32,81 +32,77 @@ function BusinessPlan() {
   const tiers = [
     {
       name: 'Starter Agent',
-      price: 3000,
-      monthlyRevenue: 3000,
-      workPerProject: 40, // hours
+      upfrontPrice: 3000,
+      monthlyPrice: 200,
+      workPerProject: 4, // hours for upfront consulting (template-based)
+      upfrontMargin: 0.60, // 60% healthy consulting margin
+      monthlyMargin: 0.75, // 75% healthy SaaS margin
     },
     {
       name: 'Growth Agent',
-      price: 8000,
-      monthlyRevenue: 8000,
-      workPerProject: 80, // hours
+      upfrontPrice: 8000,
+      monthlyPrice: 500,
+      workPerProject: 10, // hours for upfront consulting (template-based)
+      upfrontMargin: 0.60,
+      monthlyMargin: 0.75,
     },
     {
       name: 'Enterprise Agent',
-      price: 15000, // avg estimate
-      monthlyRevenue: 15000,
-      workPerProject: 120, // hours
+      upfrontPrice: 15000,
+      monthlyPrice: 1000,
+      workPerProject: 20, // hours for upfront consulting (custom architecture)
+      upfrontMargin: 0.60,
+      monthlyMargin: 0.75,
     },
   ]
 
-  // Infrastructure costs (monthly)
-  const infrastructure = {
-    cloudflareWorkers: 200, // Generous estimate (Workers + D1 + R2 + KV)
-    anthropic: 100, // Anthropic API - $100/mo max plan (per-client agents)
-    domain: 12, // .com domain annual / 12
-    emailHosting: 50, // Minimal setup
-    monitoring: 30,
-    backups: 20,
-    misc: 30, // Buffer for tools, APIs, etc
-  }
+  // Hourly rate (template-based implementation)
+  const hourlyRate = 100 // $100/hr (efficient template-based work)
 
-  const totalInfraCost = Object.values(infrastructure).reduce((a, b) => a + b, 0)
+  // Per-tier profitability analysis
+  const tierAnalysis = tiers.map((tier) => {
+    // Upfront consulting economics
+    const upfrontCost = tier.workPerProject * hourlyRate
+    const upfrontProfit = tier.upfrontPrice * tier.upfrontMargin
+    const upfrontOverhead = tier.upfrontPrice - upfrontProfit
+    const upfrontMarginPct = (tier.upfrontMargin * 100).toFixed(1)
 
-  // Business operating costs (monthly)
-  const operatingCosts = {
-    infra: totalInfraCost,
-    accountingSoftware: 25,
-    projectManagement: 50,
-    communication: 30,
-  }
+    // Monthly maintenance economics
+    const monthlyCost = tier.monthlyPrice * (1 - tier.monthlyMargin)
+    const monthlyProfit = tier.monthlyPrice * tier.monthlyMargin
+    const monthlyMarginPct = (tier.monthlyMargin * 100).toFixed(1)
 
-  const totalOperatingCost = Object.values(operatingCosts).reduce((a, b) => a + b, 0)
-
-  // Hourly rate calculation
-  const hourlyRate = 150 // $150/hr consultation rate
-
-  // Per-tier profitability
-  const perTierAnalysis = tiers.map((tier) => {
-    const laborCost = tier.workPerProject * hourlyRate // Direct labor per project
-    const allocationOfOverhead = totalOperatingCost / 3 // Divide overhead evenly across tiers for simplicity
-    const totalCostPerProject = laborCost + allocationOfOverhead
-    const grossProfit = tier.price - totalCostPerProject
-    const profitMarginNum = (grossProfit / tier.price) * 100
-    const profitMargin = profitMarginNum.toFixed(1)
+    // Annual (1 project + 12 months maintenance)
+    const annualUpfrontProfit = upfrontProfit
+    const annualMonthlyProfit = monthlyProfit * 12
+    const annualTotalProfit = annualUpfrontProfit + annualMonthlyProfit
+    const annualRevenue = tier.upfrontPrice + tier.monthlyPrice * 12
 
     return {
       ...tier,
-      laborCost,
-      allocationOfOverhead,
-      totalCostPerProject,
-      grossProfit,
-      profitMargin,
-      profitMarginNum,
+      upfrontCost,
+      upfrontProfit,
+      upfrontMarginPct,
+      monthlyCost,
+      monthlyProfit,
+      monthlyMarginPct,
+      annualUpfrontProfit,
+      annualMonthlyProfit,
+      annualTotalProfit,
+      annualRevenue,
     }
   })
 
-  // Annual projections (assumes avg 1 project per tier per month)
-  const yearlyMetrics = perTierAnalysis.map((tier) => ({
-    name: tier.name,
-    annualRevenue: tier.price * 12,
-    annualProfit: tier.grossProfit * 12,
-    annualProfitMargin: tier.profitMargin,
-  }))
-
-  const totalAnnualRevenue = yearlyMetrics.reduce((sum, t) => sum + t.annualRevenue, 0)
-  const totalAnnualProfit = yearlyMetrics.reduce((sum, t) => sum + t.annualProfit, 0)
-  const blendedProfitMargin = ((totalAnnualProfit / totalAnnualRevenue) * 100).toFixed(1)
+  // Portfolio metrics at scale (9 clients: 5 starter, 3 growth, 1 enterprise)
+  const portfolioMRR = 
+    (5 * tierAnalysis[0].monthlyPrice) +
+    (3 * tierAnalysis[1].monthlyPrice) +
+    (1 * tierAnalysis[2].monthlyPrice)
+  
+  const portfolioMonthlyProfit = 
+    (5 * tierAnalysis[0].monthlyProfit) +
+    (3 * tierAnalysis[1].monthlyProfit) +
+    (1 * tierAnalysis[2].monthlyProfit)
 
   return (
     <div className="space-y-8 max-w-6xl">
@@ -117,106 +113,39 @@ function BusinessPlan() {
         </p>
       </div>
 
-      {/* Infrastructure Costs */}
+      {/* Simplified - cost section removed for clarity */}
+
+      {/* Cost Breakdown */}
       <section className="space-y-4">
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold">Monthly Infrastructure Costs</h2>
+          <h2 className="text-2xl font-bold">Monthly Operating Cost Baseline</h2>
           <p className="text-sm text-muted-foreground">
-            Hosting & platform costs (all tiers combined)
+            Fixed overhead per client agent (before profit)
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <MetricCard
-            label="Cloudflare Workers"
-            value={`$${infrastructure.cloudflareWorkers}/mo`}
-            detail="D1 + R2 + KV + Workers (highly scalable)"
-          />
-          <MetricCard
-            label="Anthropic API"
-            value={`$${infrastructure.anthropic}/mo`}
-            detail="$100/mo max plan per client agent"
-          />
-          <MetricCard
-            label="Domain"
-            value={`$${infrastructure.domain}/mo`}
-            detail=".com annual / 12"
-          />
-          <MetricCard
-            label="Email Hosting"
-            value={`$${infrastructure.emailHosting}/mo`}
-            detail="Sendgrid or similar"
-          />
-          <MetricCard
-            label="Monitoring"
-            value={`$${infrastructure.monitoring}/mo`}
-            detail="Uptime + performance tracking"
-          />
-          <MetricCard
-            label="Backups & Redundancy"
-            value={`$${infrastructure.backups}/mo`}
-            detail="Data protection & DR"
-          />
-          <MetricCard
-            label="Miscellaneous"
-            value={`$${infrastructure.misc}/mo`}
-            detail="Tools, APIs, buffer"
-          />
-        </div>
-
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Total Monthly Infrastructure</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">${totalInfraCost}/month</div>
-            <p className="text-sm text-muted-foreground mt-2">
-              Annual: ${(totalInfraCost * 12).toLocaleString()}
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Operating Costs */}
-      <section className="space-y-4">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold">Monthly Operating Costs</h2>
-          <p className="text-sm text-muted-foreground">
-            Total overhead (infrastructure + business operations)
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <MetricCard
-            label="Infrastructure"
-            value={`$${operatingCosts.infra}/mo`}
-            detail="See breakdown above"
-          />
-          <MetricCard
-            label="Accounting"
-            value={`$${operatingCosts.accountingSoftware}/mo`}
-            detail="QuickBooks or similar"
-          />
-          <MetricCard
-            label="Project Mgmt"
-            value={`$${operatingCosts.projectManagement}/mo`}
-            detail="Asana, Monday, or similar"
-          />
-          <MetricCard
-            label="Communication"
-            value={`$${operatingCosts.communication}/mo`}
-            detail="Slack, Zoom, etc"
-          />
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Total Monthly Operating Costs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">${totalOperatingCost}/month</div>
-            <p className="text-sm text-muted-foreground mt-2">
-              Annual: ${(totalOperatingCost * 12).toLocaleString()}
+          <CardContent className="pt-6">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Anthropic API ($100/mo)</span>
+                <span className="font-mono">$100</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Infrastructure (Cloudflare + domain)</span>
+                <span className="font-mono">$42</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Support & Monitoring</span>
+                <span className="font-mono">$58</span>
+              </div>
+              <div className="border-t pt-2 flex justify-between font-semibold">
+                <span>Total Cost Per Client/Mo</span>
+                <span className="font-mono">$200</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Note: This is the cost threshold. Pricing tiers above cover this fully + profit margin.
             </p>
           </CardContent>
         </Card>
@@ -225,46 +154,74 @@ function BusinessPlan() {
       {/* Per-Tier Unit Economics */}
       <section className="space-y-4">
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold">Per-Tier Unit Economics</h2>
+          <h2 className="text-2xl font-bold">Per-Tier Unit Economics (Healthy Margins)</h2>
           <p className="text-sm text-muted-foreground">
-            Assumes $150/hr labor cost. One project per tier per month on average.
+            60% upfront consulting margin, 75% monthly SaaS margin. $150/hr labor.
           </p>
         </div>
 
         <div className="space-y-4">
-          {perTierAnalysis.map((tier) => (
-            <Card key={tier.name} className={tier.profitMarginNum >= 50 ? 'border-green-200 bg-green-50/50' : ''}>
+          {tierAnalysis.map((tier) => (
+            <Card key={tier.name} className="border-green-200">
               <CardHeader>
                 <CardTitle className="text-lg">{tier.name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Service Price</p>
-                    <p className="text-2xl font-bold">${tier.price.toLocaleString()}</p>
+                {/* Upfront Consulting */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-3">Initial Consulting Project</h4>
+                  <div className="grid gap-3 md:grid-cols-3 text-sm">
+                    <div>
+                      <p className="text-muted-foreground text-xs">YOUR CHARGE</p>
+                      <p className="text-2xl font-bold">${tier.upfrontPrice.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">YOUR COST (Labor)</p>
+                      <p className="text-2xl font-bold">${tier.upfrontCost.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">YOUR PROFIT</p>
+                      <p className="text-2xl font-bold text-green-600">${Math.round(tier.upfrontProfit).toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Direct Labor ({tier.workPerProject}h @ $150/h)</p>
-                    <p className="text-2xl font-bold">${tier.laborCost.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Allocated Overhead</p>
-                    <p className="text-2xl font-bold">${Math.round(tier.allocationOfOverhead).toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Cost</p>
-                    <p className="text-2xl font-bold">${Math.round(tier.totalCostPerProject).toLocaleString()}</p>
-                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">{tier.upfrontMarginPct}% margin on ${tier.upfrontPrice.toLocaleString()} sale</p>
                 </div>
 
-                <div className="border-t pt-4 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Gross Profit Per Project</span>
-                    <span className="text-xl font-bold text-green-600">${Math.round(tier.grossProfit).toLocaleString()}</span>
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold text-sm mb-3">Monthly Maintenance (Recurring)</h4>
+                  <div className="grid gap-3 md:grid-cols-3 text-sm">
+                    <div>
+                      <p className="text-muted-foreground text-xs">CHARGE /MONTH</p>
+                      <p className="text-2xl font-bold">${tier.monthlyPrice.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">COST /MONTH</p>
+                      <p className="text-2xl font-bold">${Math.round(tier.monthlyCost).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">PROFIT /MONTH</p>
+                      <p className="text-2xl font-bold text-green-600">${Math.round(tier.monthlyProfit).toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Profit Margin</span>
-                    <span className="text-xl font-bold text-green-600">{tier.profitMargin}%</span>
+                  <p className="text-xs text-muted-foreground mt-2">{tier.monthlyMarginPct}% margin (API + infra costs covered)</p>
+                </div>
+
+                <div className="border-t pt-4 space-y-2 p-3 rounded">
+                  <div className="flex justify-between font-semibold text-sm">
+                    <span>YEAR 1 TOTAL (Initial + 12 months)</span>
+                    <span></span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Revenue from this client</span>
+                    <span className="font-bold">${tier.annualRevenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Your total profit</span>
+                    <span className="font-bold text-green-600">${Math.round(tier.annualTotalProfit).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-semibold">
+                    <span>Blended margin</span>
+                    <span className="text-green-600">{((tier.annualTotalProfit / tier.annualRevenue) * 100).toFixed(1)}%</span>
                   </div>
                 </div>
               </CardContent>
@@ -273,59 +230,67 @@ function BusinessPlan() {
         </div>
       </section>
 
-      {/* Annual Projections */}
+      {/* Recurring Revenue at Scale */}
       <section className="space-y-4">
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold">Annual Projections (1 project/tier/month)</h2>
+          <h2 className="text-2xl font-bold">Monthly Recurring Revenue (MRR) at Scale</h2>
           <p className="text-sm text-muted-foreground">
-            Conservative scenario: 12 projects total across all tiers annually
+            Portfolio of 9 active clients (5 Starter, 3 Growth, 1 Enterprise)
           </p>
         </div>
 
-        <div className="space-y-3">
-          {yearlyMetrics.map((metric) => (
-            <Card key={metric.name}>
-              <CardContent className="pt-6">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{metric.name}</p>
-                    <p className="text-2xl font-bold">${metric.annualRevenue.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Annual Revenue</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Annual Profit</p>
-                    <p className="text-2xl font-bold text-green-600">${metric.annualProfit.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">{metric.annualProfitMargin}% margin</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Monthly Avg (12mo)</p>
-                    <p className="text-2xl font-bold">${Math.round(metric.annualProfit / 12).toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Profit per month</p>
-                  </div>
+        <Card className="border-orange-200">
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>5 Starter clients @ ${tierAnalysis[0].monthlyPrice}/mo</span>
+                  <span className="font-bold">${(5 * tierAnalysis[0].monthlyPrice).toLocaleString()}/mo</span>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <div className="flex justify-between">
+                  <span>3 Growth clients @ ${tierAnalysis[1].monthlyPrice}/mo</span>
+                  <span className="font-bold">${(3 * tierAnalysis[1].monthlyPrice).toLocaleString()}/mo</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>1 Enterprise client @ ${tierAnalysis[2].monthlyPrice}/mo</span>
+                  <span className="font-bold">${(1 * tierAnalysis[2].monthlyPrice).toLocaleString()}/mo</span>
+                </div>
+              </div>
+              <div className="border-t pt-3 space-y-2">
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Total MRR (Gross Revenue)</span>
+                  <span className="text-orange-600">${portfolioMRR.toLocaleString()}/mo</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Monthly Profit (after API + Infra)</span>
+                  <span className="text-green-600">${Math.round(portfolioMonthlyProfit).toLocaleString()}/mo</span>
+                </div>
+                <div className="flex justify-between font-bold text-base">
+                  <span>Annual Recurring Profit</span>
+                  <span className="text-green-600">${Math.round(portfolioMonthlyProfit * 12).toLocaleString()}/yr</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Card className="border-primary/50 bg-primary/5">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Total Annual Metrics (Blended)</CardTitle>
+            <CardTitle className="text-lg">Plus: Initial Consulting Upfront</CardTitle>
+            <CardDescription>One-time revenue when onboarding new clients</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid gap-4 md:grid-cols-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Annual Revenue</p>
-                <p className="text-3xl font-bold">${totalAnnualRevenue.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Annual Profit</p>
-                <p className="text-3xl font-bold text-green-600">${totalAnnualProfit.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Blended Profit Margin</p>
-                <p className="text-3xl font-bold text-green-600">{blendedProfitMargin}%</p>
-              </div>
+          <CardContent className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Starter agents</span>
+              <span className="font-bold text-green-600">$1,800 profit each</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Growth agents</span>
+              <span className="font-bold text-green-600">$4,800 profit each</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Enterprise agents</span>
+              <span className="font-bold text-green-600">$9,000 profit each</span>
             </div>
           </CardContent>
         </Card>
@@ -362,7 +327,7 @@ function BusinessPlan() {
           </CardContent>
         </Card>
 
-        <Card className="border-yellow-200 bg-yellow-50/50">
+        <Card className="border-yellow-200">
           <CardHeader>
             <CardTitle className="text-lg">⚠️ Important: Monthly Fees Must Cover API</CardTitle>
           </CardHeader>
@@ -439,7 +404,7 @@ function BusinessPlan() {
           </CardContent>
         </Card>
 
-        <Card className="border-green-200 bg-green-50/50">
+        <Card className="border-green-200">
           <CardHeader>
             <CardTitle className="text-lg">Final Recommendation: Stay on Cloudflare</CardTitle>
           </CardHeader>
@@ -454,150 +419,65 @@ function BusinessPlan() {
         </Card>
       </section>
 
-      {/* Recommended Pricing & Margins */}
+      {/* Summary & Margins */}
       <section className="space-y-4 pb-8">
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold">Recommended Pricing (Upfront + Recurring)</h2>
+          <h2 className="text-2xl font-bold">Summary: Healthy Margin Model</h2>
           <p className="text-sm text-muted-foreground">
-            Initial consulting fee + monthly maintenance (infra + support + updates)
+            60% upfront consulting + 75% monthly SaaS margins
           </p>
         </div>
 
-        <div className="space-y-3">
-          <Card className="border-blue-200 bg-blue-50/50">
-            <CardHeader>
-              <CardTitle className="text-lg">Starter Tier</CardTitle>
-              <CardDescription>
-                Covers: Anthropic $100 + Infra $142 + Support/updates
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid gap-2 md:grid-cols-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Initial Consulting</p>
-                  <p className="text-2xl font-bold">$3,000</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Monthly Maintenance</p>
-                  <p className="text-2xl font-bold">$200</p>
-                </div>
-              </div>
-              <div className="border-t pt-3 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>6-Month Revenue</span>
-                  <span className="font-bold">$4,200</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>12-Month Revenue</span>
-                  <span className="font-bold">$5,400</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Annual MRR (if 10 clients)</span>
-                  <span className="font-bold text-green-600">$2,000/mo</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-green-200 bg-green-50/50">
-            <CardHeader>
-              <CardTitle className="text-lg">Growth Tier</CardTitle>
-              <CardDescription>
-                Covers: Anthropic $100 + Infra $142 + Higher support + Updates
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid gap-2 md:grid-cols-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Initial Consulting</p>
-                  <p className="text-2xl font-bold">$8,000</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Monthly Maintenance</p>
-                  <p className="text-2xl font-bold">$500</p>
-                </div>
-              </div>
-              <div className="border-t pt-3 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>6-Month Revenue</span>
-                  <span className="font-bold">$11,000</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>12-Month Revenue</span>
-                  <span className="font-bold">$14,000</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Annual MRR (if 5 clients)</span>
-                  <span className="font-bold text-green-600">$2,500/mo</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-200 bg-purple-50/50">
-            <CardHeader>
-              <CardTitle className="text-lg">Enterprise Tier</CardTitle>
-              <CardDescription>
-                Covers: Anthropic $100-300/mo + Infra $142 + Premium support + SLAs
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid gap-2 md:grid-cols-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Initial Consulting</p>
-                  <p className="text-2xl font-bold">$15,000+</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Monthly Maintenance</p>
-                  <p className="text-2xl font-bold">$1,000+</p>
-                </div>
-              </div>
-              <div className="border-t pt-3 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>6-Month Revenue</span>
-                  <span className="font-bold">$21,000+</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>12-Month Revenue</span>
-                  <span className="font-bold">$27,000+</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Annual MRR (if 2 clients)</span>
-                  <span className="font-bold text-green-600">$2,000+/mo</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* MRR Scaling */}
-        <Card className="border-orange-200 bg-orange-50/50">
+        <Card className="border-green-200">
           <CardHeader>
-            <CardTitle className="text-lg">Recurring Revenue at Scale</CardTitle>
-            <CardDescription>Monthly recurring revenue with portfolio mix</CardDescription>
+            <CardTitle className="text-lg">Pricing & Margins by Tier</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>5 Starter clients @ $200/mo</span>
-                <span className="font-bold">$1,000/mo</span>
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="font-bold">Starter: $3,000 + $200/mo</p>
+                <div className="grid grid-cols-2 gap-2 mt-1 ml-2">
+                  <div>Upfront Profit: <span className="font-bold text-green-600">$1,800 (60%)</span></div>
+                  <div>Monthly Profit: <span className="font-bold text-green-600">$150 (75%)</span></div>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>3 Growth clients @ $500/mo</span>
-                <span className="font-bold">$1,500/mo</span>
+              <div>
+                <p className="font-bold">Growth: $8,000 + $500/mo</p>
+                <div className="grid grid-cols-2 gap-2 mt-1 ml-2">
+                  <div>Upfront Profit: <span className="font-bold text-green-600">$4,800 (60%)</span></div>
+                  <div>Monthly Profit: <span className="font-bold text-green-600">$375 (75%)</span></div>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>1 Enterprise client @ $1,000/mo</span>
-                <span className="font-bold">$1,000/mo</span>
+              <div>
+                <p className="font-bold">Enterprise: $15,000+ + $1,000+/mo</p>
+                <div className="grid grid-cols-2 gap-2 mt-1 ml-2">
+                  <div>Upfront Profit: <span className="font-bold text-green-600">$9,000 (60%)</span></div>
+                  <div>Monthly Profit: <span className="font-bold text-green-600">$750+ (75%)</span></div>
+                </div>
               </div>
             </div>
-            <div className="border-t pt-3 flex justify-between font-bold text-lg">
-              <span>Total MRR (9 clients)</span>
-              <span className="text-green-600">$3,500/mo</span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Year 1 Growth Path</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Month 1: First client onboarded</span>
+                <span className="font-bold">+$1,800–$9,000 upfront</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Month 2+: MRR starts accruing</span>
+                <span className="font-bold">+$150–$750/mo/client</span>
+              </div>
+              <div className="flex justify-between">
+                <span>By Month 12: 9 clients @ scale</span>
+                <span className="font-bold">$2,700+/mo recurring profit</span>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              = $42,000/year recurring + new consulting fees
-            </p>
           </CardContent>
         </Card>
       </section>
