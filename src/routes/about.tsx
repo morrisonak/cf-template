@@ -9,7 +9,7 @@ function About() {
     <div className="space-y-12 max-w-3xl">
       {/* Header */}
       <section className="space-y-4">
-        <h1 className="text-4xl font-bold">About Meta Advisors</h1>
+        <h1 className="text-4xl font-bold">About MetaV Advisors</h1>
         <p className="text-lg text-muted-foreground">
           We specialize in designing and deploying intelligent AI agents that drive measurable business growth.
         </p>
@@ -60,7 +60,7 @@ function About() {
 
       {/* Why Us */}
       <section className="space-y-6 py-8 border-t">
-        <h2 className="text-2xl font-bold">Why Choose Meta Advisors</h2>
+        <h2 className="text-2xl font-bold">Why Choose MetaV Advisors</h2>
         
         <div className="space-y-4">
           <div className="flex gap-3">

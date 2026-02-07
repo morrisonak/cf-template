@@ -38,7 +38,7 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       ...seo({
-        title: 'Meta Advisors | Custom AI Agents for Revenue Growth',
+        title: 'MetaV Advisors | Custom AI Agents for Revenue Growth',
         description: 'We design and deploy intelligent AI agents tailored to your business. Automate workflows, accelerate revenue, scale with zero technical overhead.',
       }),
     ],
@@ -97,7 +97,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               activeProps={{ className: 'text-primary' }}
               activeOptions={{ exact: true }}
             >
-              Meta Advisors
+              MetaV Advisors
             </Link>
             <div className="flex gap-6 text-sm">
               <Link
