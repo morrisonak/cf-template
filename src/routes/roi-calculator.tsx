@@ -4,8 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { Slider } from '~/components/ui/slider'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 import { TrendingUp, DollarSign, Clock, CheckCircle2 } from 'lucide-react'
 
 export const Route = createFileRoute('/roi-calculator')({
@@ -14,7 +12,7 @@ export const Route = createFileRoute('/roi-calculator')({
 
 function ROICalculator() {
   const [hoursPerWeek, setHoursPerWeek] = useState(10)
-  const [hourlyRate, setHourlyRate] = useState(50)
+  const [hourlyRate, setHourlyRate] = useState('50')
   const [teamSize, setTeamSize] = useState('3')
   const [automationPercent, setAutomationPercent] = useState(75)
   const [tier, setTier] = useState('growth')
@@ -64,16 +62,16 @@ function ROICalculator() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Hours per week */}
-            <div className="space-y-3">
-              <Label htmlFor="hours">Hours/week on this task: <span className="text-primary font-semibold">{hoursPerWeek}</span></Label>
-              <Slider
+            <div className="space-y-2">
+              <Label htmlFor="hours">Hours/week on this task</Label>
+              <Input
                 id="hours"
-                min={1}
-                max={40}
-                step={1}
-                value={[hoursPerWeek]}
-                onValueChange={(val) => setHoursPerWeek(val[0])}
-                className="w-full"
+                type="number"
+                min="1"
+                max="40"
+                value={hoursPerWeek}
+                onChange={(e) => setHoursPerWeek(Math.min(40, Math.max(1, parseInt(e.target.value) || 0)))}
+                placeholder="10"
               />
               <p className="text-xs text-muted-foreground">
                 That's {(hoursPerWeek * 52).toLocaleString()} hours per year
@@ -82,21 +80,17 @@ function ROICalculator() {
 
             {/* Hourly rate */}
             <div className="space-y-2">
-              <Label htmlFor="rate">Hourly rate: ${hourlyRate}</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
-                <Input
-                  id="rate"
-                  type="number"
-                  min="10"
-                  max="500"
-                  step="5"
-                  value={hourlyRate}
-                  onChange={(e) => setHourlyRate(e.target.value)}
-                  placeholder="Hourly rate"
-                  className="pl-6"
-                />
-              </div>
+              <Label htmlFor="rate">Hourly rate ($)</Label>
+              <Input
+                id="rate"
+                type="number"
+                min="10"
+                max="500"
+                step="5"
+                value={hourlyRate}
+                onChange={(e) => setHourlyRate(e.target.value)}
+                placeholder="50"
+              />
               <p className="text-xs text-muted-foreground">
                 Annual cost: ${annualCost.toLocaleString('en-US', { maximumFractionDigits: 0 })}
               </p>
@@ -105,50 +99,60 @@ function ROICalculator() {
             {/* Team size */}
             <div className="space-y-2">
               <Label htmlFor="team">Team size affected</Label>
-              <Select value={teamSize} onValueChange={setTeamSize}>
-                <SelectTrigger id="team">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
-                    <SelectItem key={size} value={size.toString()}>
-                      {size} {size === 1 ? 'person' : 'people'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="team"
+                type="number"
+                min="1"
+                max="10"
+                value={teamSize}
+                onChange={(e) => setTeamSize(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)).toString())}
+                placeholder="3"
+              />
+              <p className="text-xs text-muted-foreground">
+                How many people spend time on this task
+              </p>
             </div>
 
             {/* Automation percentage */}
-            <div className="space-y-3">
-              <Label htmlFor="automation">Automation coverage: <span className="text-primary font-semibold">{automationPercent}%</span></Label>
-              <Slider
+            <div className="space-y-2">
+              <Label htmlFor="automation">Automation coverage (%)</Label>
+              <Input
                 id="automation"
-                min={10}
-                max={100}
-                step={5}
-                value={[automationPercent]}
-                onValueChange={(val) => setAutomationPercent(val[0])}
-                className="w-full"
+                type="number"
+                min="10"
+                max="100"
+                step="5"
+                value={automationPercent}
+                onChange={(e) => setAutomationPercent(Math.min(100, Math.max(10, parseInt(e.target.value) || 0)))}
+                placeholder="75"
               />
               <p className="text-xs text-muted-foreground">
-                How much of the task can be automated
+                What % of the task can be automated
               </p>
             </div>
 
             {/* Service tier */}
             <div className="space-y-2">
               <Label htmlFor="tier">Service tier</Label>
-              <Select value={tier} onValueChange={setTier}>
-                <SelectTrigger id="tier">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="starter">Starter ($3K upfront)</SelectItem>
-                  <SelectItem value="growth">Growth ($8K upfront)</SelectItem>
-                  <SelectItem value="enterprise">Enterprise ($15K+ upfront)</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                {['starter', 'growth', 'enterprise'].map((t) => (
+                  <label key={t} className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-accent" style={{ backgroundColor: tier === t ? 'var(--primary)' : 'transparent', color: tier === t ? 'white' : 'inherit' }}>
+                    <input
+                      type="radio"
+                      name="tier"
+                      value={t}
+                      checked={tier === t}
+                      onChange={(e) => setTier(e.target.value)}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm font-medium capitalize">
+                      {t === 'starter' && 'Starter ($3K upfront)'}
+                      {t === 'growth' && 'Growth ($8K upfront)'}
+                      {t === 'enterprise' && 'Enterprise ($15K+ upfront)'}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
