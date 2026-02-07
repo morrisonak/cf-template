@@ -221,6 +221,8 @@ bunx shadcn@latest add [component]
 
 ## Cloudflare Setup
 
+> **Gotcha:** If Wrangler gives a 400 Bad Request on the `/memberships` endpoint, it means the API token lacks account-level permissions. The fix is to add the `database_id` (and KV `id`, etc.) directly in `wrangler.jsonc` so Wrangler skips the account lookup entirely. Always grab the IDs from the `wrangler d1 create` / `wrangler kv namespace create` output and add them to the config immediately.
+
 1. Create resources:
    ```bash
    bunx wrangler d1 create cf-template-db
@@ -228,7 +230,7 @@ bunx shadcn@latest add [component]
    bunx wrangler kv namespace create KV
    ```
 
-2. Update `wrangler.jsonc` with D1 database ID and KV namespace ID
+2. Update `wrangler.jsonc` with D1 `database_id` and KV namespace `id` from the output above
 
 3. Set auth secret:
    ```bash
