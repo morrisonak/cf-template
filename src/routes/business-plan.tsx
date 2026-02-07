@@ -53,6 +53,7 @@ function BusinessPlan() {
   // Infrastructure costs (monthly)
   const infrastructure = {
     cloudflareWorkers: 200, // Generous estimate (Workers + D1 + R2 + KV)
+    anthropic: 100, // Anthropic API - $100/mo max plan (per-client agents)
     domain: 12, // .com domain annual / 12
     emailHosting: 50, // Minimal setup
     monitoring: 30,
@@ -130,6 +131,11 @@ function BusinessPlan() {
             label="Cloudflare Workers"
             value={`$${infrastructure.cloudflareWorkers}/mo`}
             detail="D1 + R2 + KV + Workers (highly scalable)"
+          />
+          <MetricCard
+            label="Anthropic API"
+            value={`$${infrastructure.anthropic}/mo`}
+            detail="$100/mo max plan per client agent"
           />
           <MetricCard
             label="Domain"
@@ -325,6 +331,54 @@ function BusinessPlan() {
         </Card>
       </section>
 
+      {/* Anthropic API Costs */}
+      <section className="space-y-4">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold">Anthropic API Strategy</h2>
+          <p className="text-sm text-muted-foreground">
+            API costs must be covered by monthly maintenance fees
+          </p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Pricing Tiers</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <ul className="space-y-2 text-sm">
+              <li>
+                <strong>Starter:</strong> $100/mo max plan
+                <p className="text-xs text-muted-foreground">Single workflow agent, lower usage</p>
+              </li>
+              <li>
+                <strong>Growth:</strong> $100-150/mo
+                <p className="text-xs text-muted-foreground">Multi-workflow, higher request volume</p>
+              </li>
+              <li>
+                <strong>Enterprise:</strong> $200-300/mo (custom)
+                <p className="text-xs text-muted-foreground">High-volume, dedicated support from Anthropic</p>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card className="border-yellow-200 bg-yellow-50/50">
+          <CardHeader>
+            <CardTitle className="text-lg">⚠️ Important: Monthly Fees Must Cover API</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p>
+              Your monthly maintenance fee needs to fully cover Anthropic API costs. Don't let clients eat into your margin.
+            </p>
+            <ul className="list-disc list-inside space-y-1 mt-2">
+              <li>Starter $200/mo = $100 Anthropic + $100 profit/ops</li>
+              <li>Growth $500/mo = $125 Anthropic + $375 profit/ops</li>
+              <li>Enterprise $1,000+/mo = $250 Anthropic + $750+ profit/ops</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </section>
+
       {/* Hosting Recommendation */}
       <section className="space-y-4">
         <div className="space-y-2">
@@ -403,32 +457,149 @@ function BusinessPlan() {
       {/* Recommended Pricing & Margins */}
       <section className="space-y-4 pb-8">
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold">Recommended Pricing (Current Model)</h2>
+          <h2 className="text-2xl font-bold">Recommended Pricing (Upfront + Recurring)</h2>
           <p className="text-sm text-muted-foreground">
-            With 45-50% margins and flat infrastructure cost
+            Initial consulting fee + monthly maintenance (infra + support + updates)
           </p>
         </div>
 
         <div className="space-y-3">
+          <Card className="border-blue-200 bg-blue-50/50">
+            <CardHeader>
+              <CardTitle className="text-lg">Starter Tier</CardTitle>
+              <CardDescription>
+                Covers: Anthropic $100 + Infra $142 + Support/updates
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-2 md:grid-cols-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">Initial Consulting</p>
+                  <p className="text-2xl font-bold">$3,000</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Monthly Maintenance</p>
+                  <p className="text-2xl font-bold">$200</p>
+                </div>
+              </div>
+              <div className="border-t pt-3 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>6-Month Revenue</span>
+                  <span className="font-bold">$4,200</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>12-Month Revenue</span>
+                  <span className="font-bold">$5,400</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Annual MRR (if 10 clients)</span>
+                  <span className="font-bold text-green-600">$2,000/mo</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="border-green-200 bg-green-50/50">
-            <CardContent className="pt-6">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-bold">Starter: $3,000</span>
-                  <span className="text-sm text-muted-foreground">45% margin = $1,350/project profit</span>
+            <CardHeader>
+              <CardTitle className="text-lg">Growth Tier</CardTitle>
+              <CardDescription>
+                Covers: Anthropic $100 + Infra $142 + Higher support + Updates
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-2 md:grid-cols-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">Initial Consulting</p>
+                  <p className="text-2xl font-bold">$8,000</p>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold">Growth: $8,000</span>
-                  <span className="text-sm text-muted-foreground">48% margin = $3,840/project profit</span>
+                <div>
+                  <p className="text-sm text-muted-foreground">Monthly Maintenance</p>
+                  <p className="text-2xl font-bold">$500</p>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold">Enterprise: $15,000+</span>
-                  <span className="text-sm text-muted-foreground">50%+ margin = $7,500+/project profit</span>
+              </div>
+              <div className="border-t pt-3 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>6-Month Revenue</span>
+                  <span className="font-bold">$11,000</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>12-Month Revenue</span>
+                  <span className="font-bold">$14,000</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Annual MRR (if 5 clients)</span>
+                  <span className="font-bold text-green-600">$2,500/mo</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-purple-200 bg-purple-50/50">
+            <CardHeader>
+              <CardTitle className="text-lg">Enterprise Tier</CardTitle>
+              <CardDescription>
+                Covers: Anthropic $100-300/mo + Infra $142 + Premium support + SLAs
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-2 md:grid-cols-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">Initial Consulting</p>
+                  <p className="text-2xl font-bold">$15,000+</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Monthly Maintenance</p>
+                  <p className="text-2xl font-bold">$1,000+</p>
+                </div>
+              </div>
+              <div className="border-t pt-3 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>6-Month Revenue</span>
+                  <span className="font-bold">$21,000+</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>12-Month Revenue</span>
+                  <span className="font-bold">$27,000+</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Annual MRR (if 2 clients)</span>
+                  <span className="font-bold text-green-600">$2,000+/mo</span>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* MRR Scaling */}
+        <Card className="border-orange-200 bg-orange-50/50">
+          <CardHeader>
+            <CardTitle className="text-lg">Recurring Revenue at Scale</CardTitle>
+            <CardDescription>Monthly recurring revenue with portfolio mix</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>5 Starter clients @ $200/mo</span>
+                <span className="font-bold">$1,000/mo</span>
+              </div>
+              <div className="flex justify-between">
+                <span>3 Growth clients @ $500/mo</span>
+                <span className="font-bold">$1,500/mo</span>
+              </div>
+              <div className="flex justify-between">
+                <span>1 Enterprise client @ $1,000/mo</span>
+                <span className="font-bold">$1,000/mo</span>
+              </div>
+            </div>
+            <div className="border-t pt-3 flex justify-between font-bold text-lg">
+              <span>Total MRR (9 clients)</span>
+              <span className="text-green-600">$3,500/mo</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              = $42,000/year recurring + new consulting fees
+            </p>
+          </CardContent>
+        </Card>
       </section>
     </div>
   )
