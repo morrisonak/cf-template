@@ -1,10 +1,33 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import { getRequestHeaders } from '@tanstack/react-start/server'
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { TrendingUp, Target, Zap, BookOpen, Calendar, DollarSign, CheckCircle2 } from 'lucide-react'
 
+const checkAuth = createServerFn({ method: 'GET' }).handler(async () => {
+  const headers = getRequestHeaders()
+  const cookie = headers.get('cookie')
+
+  if (!cookie) {
+    throw redirect({ to: '/login' })
+  }
+
+  const match = cookie.match(/auth_token=([^;]+)/)
+  const token = match ? match[1] : null
+
+  if (!token) {
+    throw redirect({ to: '/login' })
+  }
+
+  return { authenticated: true }
+})
+
 export const Route = createFileRoute('/marketing-plan')({
+  beforeLoad: async () => {
+    await checkAuth()
+  },
   component: MarketingPlan,
 })
 
