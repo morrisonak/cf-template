@@ -128,24 +128,47 @@ function BusinessPlan() {
           <CardContent className="pt-6">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>Anthropic API ($100/mo)</span>
+                <span>Anthropic API ($100/mo max plan)</span>
                 <span className="font-mono">$100</span>
               </div>
               <div className="flex justify-between">
-                <span>Infrastructure (Cloudflare + domain)</span>
-                <span className="font-mono">$42</span>
+                <span>DigitalOcean Droplet (2vCPU/2GB base)</span>
+                <span className="font-mono">$12</span>
               </div>
               <div className="flex justify-between">
-                <span>Support & Monitoring</span>
-                <span className="font-mono">$58</span>
+                <span>Monitoring & Support (shared)</span>
+                <span className="font-mono">$5</span>
               </div>
               <div className="border-t pt-2 flex justify-between font-semibold">
                 <span>Total Cost Per Client/Mo</span>
-                <span className="font-mono">$200</span>
+                <span className="font-mono">$117</span>
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              Note: This is the cost threshold. Pricing tiers above cover this fully + profit margin.
+              Infrastructure: DigitalOcean 2vCPU/2GB ($12/mo) handles Starter/Growth agents; Enterprise may need dedicated $24/mo. At scale, consolidate multiple clients on shared servers.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Scale Economics</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>5 Starter + 3 Growth clients on 1 × $12/mo server</span>
+              <span className="font-bold">$2.40/client</span>
+            </div>
+            <div className="flex justify-between">
+              <span>1 Enterprise client on 1 × $24/mo server</span>
+              <span className="font-bold">$24/client</span>
+            </div>
+            <div className="border-t pt-2 flex justify-between font-semibold">
+              <span>Avg infrastructure cost (9 clients)</span>
+              <span className="font-bold">$5.30/client</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Anthropic remains fixed at $100/mo per client. Total: ~$105/client at scale. Still 75%+ margin on monthly fees.
             </p>
           </CardContent>
         </Card>
@@ -350,71 +373,56 @@ function BusinessPlan() {
           <h2 className="text-2xl font-bold">Hosting Strategy & Recommendation</h2>
         </div>
 
-        <Card>
+        <Card className="border-purple-200">
           <CardHeader>
-            <CardTitle className="text-lg">Why Cloudflare (Current Choice)</CardTitle>
+            <CardTitle className="text-lg">Cloudflare: Official Standard for All Web Hosting</CardTitle>
             <CardDescription>
-              Optimal for all tiers — no infrastructure scaling needed
+              Marketing site, APIs, and edge compute
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ul className="space-y-2 text-sm">
-              <li>✅ <strong>Starter:</strong> Workers + D1 handles single workflow agent</li>
-              <li>✅ <strong>Growth:</strong> Multi-workflow, 3+ integrations — still Cloudflare</li>
-              <li>✅ <strong>Enterprise:</strong> Custom, unlimited workflows — Cloudflare scales infinitely</li>
-              <li>✅ <strong>Cost:</strong> No per-project infrastructure — flat $200/mo covers all</li>
-              <li>✅ <strong>Scaling:</strong> Zero ops burden; CF handles traffic, redundancy, global CDN</li>
+              <li>✅ <strong>MetaV Advisors site:</strong> Hosted on Cloudflare Workers</li>
+              <li>✅ <strong>All APIs:</strong> Cloudflare Workers edge compute</li>
+              <li>✅ <strong>Database:</strong> D1 (serverless SQLite at the edge)</li>
+              <li>✅ <strong>Storage:</strong> R2 (S3-compatible, no egress fees)</li>
+              <li>✅ <strong>Caching & KV:</strong> Global KV for state/settings</li>
+              <li>✅ <strong>Cost:</strong> Scales infinitely, zero infrastructure management, predictable billing</li>
+              <li>⚠️ <strong>Never:</strong> Vercel, Netlify, or alternative platforms — Cloudflare only</li>
             </ul>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Why NOT DigitalOcean?</CardTitle>
+            <CardTitle className="text-lg">Infrastructure Split: Cloudflare + DigitalOcean</CardTitle>
             <CardDescription>
-              For this business model, DO adds unnecessary overhead
+              Optimal for agent consulting model
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ul className="space-y-2 text-sm">
-              <li>❌ App Platform: $12/mo minimum per app × 3-5 apps = $36-60/mo</li>
-              <li>❌ Managed Database: $15/mo minimum for PostgreSQL/MySQL</li>
-              <li>❌ Monitoring: Additional cost + ops responsibility</li>
-              <li>❌ Scaling: Manual intervention required as traffic grows</li>
-              <li>✅ <em>Better for:</em> Traditional monolith apps, data science workloads, complex infra</li>
+              <li>✅ <strong>Cloudflare:</strong> Marketing site, APIs, edge compute (cost: $0-50/mo depending on scale)</li>
+              <li>✅ <strong>DigitalOcean Droplets:</strong> Agent hosting (2vCPU/2GB @ $12/mo per agent base)</li>
+              <li>✅ <strong>Anthropic API:</strong> AI backbone ($100/mo per client, covered by monthly fee)</li>
+              <li>✅ <strong>No PaaS overhead:</strong> Both platforms are predictable, linear cost</li>
+              <li>✅ <strong>Scaling path:</strong> Consolidate agents on shared DO servers as portfolio grows</li>
             </ul>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-green-200 bg-green-50/50">
           <CardHeader>
-            <CardTitle className="text-lg">Alternative: Vercel (for dashboards)</CardTitle>
-            <CardDescription>
-              If you build custom dashboards for clients
-            </CardDescription>
+            <CardTitle className="text-lg">Official Hosting Strategy: Cloudflare Only</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <ul className="space-y-2 text-sm">
-              <li>✅ Starter: $20/mo + $5/edge function = $25/mo</li>
-              <li>✅ Growth: $80/mo (includes DB)</li>
-              <li>✅ Enterprise: Custom $200+/mo</li>
-              <li>⚠️  Only needed if building *new* dashboards for each client</li>
-              <li>💡 Your current model (agents + APIs) doesn't require this</li>
+              <li>✅ <strong>Marketing Site:</strong> Cloudflare Workers (free tier covers site hosting)</li>
+              <li>✅ <strong>Client Agents:</strong> Hosted on DigitalOcean (2vCPU/2GB @ $12/mo base)</li>
+              <li>✅ <strong>All APIs & Edge Logic:</strong> Cloudflare Workers + D1 + R2 + KV</li>
+              <li>✅ <strong>No alternative platforms:</strong> Cloudflare is the standard for all web infrastructure</li>
+              <li>💡 Cloudflare scales infinitely, costs scale linearly, zero infrastructure management</li>
             </ul>
-          </CardContent>
-        </Card>
-
-        <Card className="border-green-200">
-          <CardHeader>
-            <CardTitle className="text-lg">Final Recommendation: Stay on Cloudflare</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <p>
-              Your hosting is already optimized. **Do not move to DigitalOcean.** Cloudflare Workers scales infinitely, costs the same whether you're running 1 agent or 100, and requires zero infrastructure management.
-            </p>
-            <p className="font-medium mt-3">
-              Bottom line: Keep the $200/mo Cloudflare baseline. Use it for all tiers. Redirect DigitalOcean budget to margin/marketing.
-            </p>
           </CardContent>
         </Card>
       </section>
