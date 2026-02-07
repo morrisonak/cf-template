@@ -28,6 +28,13 @@ export function MobileNav() {
               Services
             </Link>
             <Link
+              to="/roi-calculator"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+            >
+              ROI Calculator
+            </Link>
+            <Link
               to="/about"
               onClick={() => setOpen(false)}
               className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
@@ -40,6 +47,20 @@ export function MobileNav() {
               className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
             >
               Contact
+            </Link>
+            <Link
+              to="/marketing-plan"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+            >
+              Marketing Plan
+            </Link>
+            <Link
+              to="/business-plan"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+            >
+              Business Plan
             </Link>
           </nav>
         </div>

@@ -109,6 +109,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 Services
               </Link>
               <Link
+                to="/roi-calculator"
+                className="hover:text-primary"
+                activeProps={{ className: 'text-primary' }}
+              >
+                ROI Calculator
+              </Link>
+              <Link
                 to="/about"
                 className="hover:text-primary"
                 activeProps={{ className: 'text-primary' }}
@@ -121,6 +128,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 activeProps={{ className: 'text-primary' }}
               >
                 Contact
+              </Link>
+              <Link
+                to="/marketing-plan"
+                className="hover:text-primary"
+                activeProps={{ className: 'text-primary' }}
+              >
+                Marketing Plan
+              </Link>
+              <Link
+                to="/business-plan"
+                className="hover:text-primary"
+                activeProps={{ className: 'text-primary' }}
+              >
+                Business Plan
               </Link>
             </div>
             <div className="flex items-center gap-2">
