@@ -16,6 +16,7 @@ import { NotFound } from '~/components/NotFound'
 import { UserNav } from '~/components/UserNav'
 import { ThemeProvider } from '~/components/theme-provider'
 import { ThemeToggle } from '~/components/theme-toggle'
+import { MobileNav } from '~/components/mobile-nav'
 import appCss from '~/styles/app.css?url'
 import { seo } from '~/utils/seo'
 
@@ -89,7 +90,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <nav className="border-b">
+        <nav className="border-b relative">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Link
               to="/"
@@ -99,7 +100,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             >
               MetaV Advisors
             </Link>
-            <div className="flex gap-6 text-sm">
+            <div className="hidden md:flex gap-6 text-sm">
               <Link
                 to="/services"
                 className="hover:text-primary"
@@ -122,7 +123,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 Contact
               </Link>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <MobileNav />
+            </div>
           </div>
         </nav>
         <main className="container mx-auto px-4 py-8">
