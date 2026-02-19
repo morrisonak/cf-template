@@ -29,6 +29,8 @@ jobs:
 
       - run: bun install
 
+      - run: bun run build
+
       - name: Run D1 migrations
         uses: cloudflare/wrangler-action@v3
         with:
