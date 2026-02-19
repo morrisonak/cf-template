@@ -4,6 +4,15 @@ import { getBucket } from '~/utils/cloudflare'
 export const Route = createFileRoute('/api/files/$')({
   server: {
     handlers: {
+      DELETE: async ({ params }) => {
+        const bucket = getBucket()
+        const key = decodeURIComponent(params._splat || '')
+        if (!key) {
+          return Response.json({ error: 'Key required' }, { status: 400 })
+        }
+        await bucket.delete(key)
+        return Response.json({ success: true })
+      },
       GET: async ({ params }) => {
         const bucket = getBucket()
         const key = decodeURIComponent(params._splat || '')

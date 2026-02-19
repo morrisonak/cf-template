@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,61 +22,57 @@ import {
 } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import {
-  listSettings,
-  setSetting,
-  deleteSetting,
-  getCachedValue,
-  clearCache,
-  type SettingItem,
-} from '~/server/settings'
+
+type SettingItem = { key: string; value: string }
 
 export const Route = createFileRoute('/settings')({
-  loader: () => listSettings(),
   component: SettingsPage,
 })
 
 function SettingsPage() {
-  const loaderData = Route.useLoaderData()
-  const [settings, setSettings] = useState<SettingItem[]>(loaderData)
+  const queryClient = useQueryClient()
   const [newKey, setNewKey] = useState('')
   const [newValue, setNewValue] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Sync with loader data when it changes
-  useEffect(() => {
-    setSettings(loaderData)
-  }, [loaderData])
+  const { data: settings = [], isLoading } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const res = await fetch('/api/settings')
+      if (!res.ok) throw new Error('Failed to load settings')
+      return res.json() as Promise<SettingItem[]>
+    },
+  })
+
+  const addMutation = useMutation({
+    mutationFn: async (data: { key: string; value: string }) => {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error('Failed to save setting')
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+      setNewKey('')
+      setNewValue('')
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (key: string) => {
+      const res = await fetch(`/api/settings?key=${encodeURIComponent(key)}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete setting')
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
 
   const handleAddSetting = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newKey.trim() || !newValue.trim()) return
-
-    const key = newKey.trim()
-    const value = newValue.trim()
-
-    setIsSubmitting(true)
-    try {
-      await setSetting({ data: { key, value } })
-      // Update local state immediately
-      setSettings((prev) => {
-        const exists = prev.find((s) => s.key === key)
-        if (exists) {
-          return prev.map((s) => (s.key === key ? { key, value } : s))
-        }
-        return [...prev, { key, value }].sort((a, b) => a.key.localeCompare(b.key))
-      })
-      setNewKey('')
-      setNewValue('')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleDelete = async (key: string) => {
-    await deleteSetting({ data: key })
-    // Update local state immediately
-    setSettings((prev) => prev.filter((s) => s.key !== key))
+    addMutation.mutate({ key: newKey.trim(), value: newValue.trim() })
   }
 
   return (
@@ -87,13 +84,10 @@ function SettingsPage() {
         </p>
       </div>
 
-      {/* Add Setting */}
       <Card>
         <CardHeader>
           <CardTitle>Add Setting</CardTitle>
-          <CardDescription>
-            Store a new key-value pair in Cloudflare KV
-          </CardDescription>
+          <CardDescription>Store a new key-value pair in Cloudflare KV</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAddSetting} className="space-y-4">
@@ -105,7 +99,7 @@ function SettingsPage() {
                   placeholder="my-setting"
                   value={newKey}
                   onChange={(e) => setNewKey(e.target.value)}
-                  disabled={isSubmitting}
+                  disabled={addMutation.isPending}
                 />
               </div>
               <div className="space-y-2">
@@ -115,27 +109,31 @@ function SettingsPage() {
                   placeholder="some value"
                   value={newValue}
                   onChange={(e) => setNewValue(e.target.value)}
-                  disabled={isSubmitting}
+                  disabled={addMutation.isPending}
                 />
               </div>
             </div>
-            <Button type="submit" disabled={isSubmitting || !newKey.trim() || !newValue.trim()}>
-              {isSubmitting ? 'Saving...' : 'Add Setting'}
+            <Button
+              type="submit"
+              disabled={addMutation.isPending || !newKey.trim() || !newValue.trim()}
+            >
+              {addMutation.isPending ? 'Saving...' : 'Add Setting'}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      {/* Settings List */}
       <Card>
         <CardHeader>
           <CardTitle>Stored Settings</CardTitle>
           <CardDescription>
-            {settings.length} setting{settings.length !== 1 ? 's' : ''} in KV storage
+            {isLoading
+              ? 'Loading...'
+              : `${settings.length} setting${settings.length !== 1 ? 's' : ''} in KV storage`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {settings.length === 0 ? (
+          {settings.length === 0 && !isLoading ? (
             <p className="text-center text-muted-foreground py-8">
               No settings stored yet
             </p>
@@ -145,7 +143,7 @@ function SettingsPage() {
                 <SettingRow
                   key={setting.key}
                   setting={setting}
-                  onDelete={handleDelete}
+                  onDelete={(key) => deleteMutation.mutate(key)}
                 />
               ))}
             </div>
@@ -153,7 +151,6 @@ function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Cache Demo */}
       <CacheDemo />
     </div>
   )
@@ -164,19 +161,8 @@ function SettingRow({
   onDelete,
 }: {
   setting: SettingItem
-  onDelete: (key: string) => Promise<void>
+  onDelete: (key: string) => void
 }) {
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      await onDelete(setting.key)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
-
   return (
     <div className="flex items-center justify-between py-3 gap-4">
       <div className="min-w-0 flex-1">
@@ -185,22 +171,22 @@ function SettingRow({
       </div>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" size="sm" disabled={isDeleting}>
-            {isDeleting ? 'Deleting...' : 'Delete'}
+          <Button variant="destructive" size="sm">
+            Delete
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Setting</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{setting.key}"? This action cannot
-              be undone.
+              Are you sure you want to delete "{setting.key}"? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={() => onDelete(setting.key)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
@@ -223,8 +209,9 @@ function CacheDemo() {
   const handleFetch = async () => {
     setIsLoading(true)
     try {
-      const result = await getCachedValue({ data: cacheKey })
-      setCacheResult(result)
+      const res = await fetch(`/api/cache/${cacheKey}`)
+      if (!res.ok) throw new Error('Failed to fetch')
+      setCacheResult(await res.json())
     } finally {
       setIsLoading(false)
     }
@@ -233,7 +220,7 @@ function CacheDemo() {
   const handleClear = async () => {
     setIsLoading(true)
     try {
-      await clearCache({ data: cacheKey })
+      await fetch(`/api/cache/${cacheKey}`, { method: 'DELETE' })
       setCacheResult(null)
     } finally {
       setIsLoading(false)
@@ -262,7 +249,11 @@ function CacheDemo() {
           <Button onClick={handleFetch} disabled={isLoading || !cacheKey}>
             {isLoading ? 'Loading...' : 'Fetch Value'}
           </Button>
-          <Button variant="outline" onClick={handleClear} disabled={isLoading || !cacheKey}>
+          <Button
+            variant="outline"
+            onClick={handleClear}
+            disabled={isLoading || !cacheKey}
+          >
             Clear Cache
           </Button>
         </div>
@@ -281,16 +272,11 @@ function CacheDemo() {
               </span>
             </div>
             <p className="font-mono text-sm break-all">{cacheResult.value}</p>
-            {cacheResult.fromCache && (
-              <p className="text-xs text-muted-foreground">
-                Value retrieved from KV cache. Click "Clear Cache" and fetch again to see a new computed value.
-              </p>
-            )}
-            {!cacheResult.fromCache && (
-              <p className="text-xs text-muted-foreground">
-                Value was computed and cached with 60-second TTL. Fetch again within 60 seconds to see cached response.
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground">
+              {cacheResult.fromCache
+                ? 'Value retrieved from KV cache. Click "Clear Cache" and fetch again to see a new computed value.'
+                : 'Value was computed and cached with 60-second TTL. Fetch again within 60 seconds to see cached response.'}
+            </p>
           </div>
         )}
       </CardContent>

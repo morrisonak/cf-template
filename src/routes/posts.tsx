@@ -24,13 +24,14 @@ import {
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Textarea } from '~/components/ui/textarea'
-import {
-  getPosts,
-  createPost,
-  updatePost,
-  deletePost,
-  type Post,
-} from '~/server/posts'
+
+type Post = {
+  id: number
+  title: string
+  content: string | null
+  created_at: string
+  updated_at: string
+}
 
 export const Route = createFileRoute('/posts')({
   component: PostsPage,
@@ -41,7 +42,6 @@ function PostsPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
 
-  // Fetch posts with useQuery
   const {
     data: posts = [],
     isLoading,
@@ -50,32 +50,50 @@ function PostsPage() {
     refetch,
   } = useQuery({
     queryKey: ['posts'],
-    queryFn: () => getPosts(),
+    queryFn: async () => {
+      const res = await fetch('/api/posts')
+      if (!res.ok) throw new Error('Failed to load posts')
+      return res.json() as Promise<Post[]>
+    },
   })
 
-  // Create mutation
   const createMutation = useMutation({
-    mutationFn: (data: { title: string; content?: string }) =>
-      createPost({ data }),
+    mutationFn: async (data: { title: string; content?: string }) => {
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error('Failed to create post')
+      return res.json() as Promise<Post>
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setIsCreating(false)
     },
   })
 
-  // Update mutation
   const updateMutation = useMutation({
-    mutationFn: (data: { id: number; title: string; content?: string }) =>
-      updatePost({ data }),
+    mutationFn: async (data: { id: number; title: string; content?: string }) => {
+      const res = await fetch('/api/posts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: data.id, title: data.title, content: data.content }),
+      })
+      if (!res.ok) throw new Error('Failed to update post')
+      return res.json() as Promise<Post>
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setEditingId(null)
     },
   })
 
-  // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deletePost({ data: id }),
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/posts?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete post')
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
     },
@@ -104,7 +122,6 @@ function PostsPage() {
     deleteMutation.mutate(id)
   }
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -130,15 +147,12 @@ function PostsPage() {
     )
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Posts</h1>
-          <p className="text-muted-foreground">
-            Full CRUD demo with server functions
-          </p>
+          <p className="text-muted-foreground">Full CRUD demo with server functions</p>
         </div>
         <Card className="border-destructive">
           <CardContent className="py-8 text-center">
@@ -160,9 +174,7 @@ function PostsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Posts</h1>
-          <p className="text-muted-foreground">
-            Full CRUD demo with TanStack Query
-          </p>
+          <p className="text-muted-foreground">Full CRUD demo with TanStack Query</p>
         </div>
         {!isCreating && (
           <Button onClick={() => setIsCreating(true)}>New Post</Button>
@@ -324,12 +336,7 @@ function PostCard({
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onEdit}
-              disabled={isDeleting}
-            >
+            <Button variant="outline" size="sm" onClick={onEdit} disabled={isDeleting}>
               Edit
             </Button>
             <AlertDialog>
@@ -362,9 +369,7 @@ function PostCard({
       </CardHeader>
       {post.content && (
         <CardContent>
-          <p className="text-muted-foreground whitespace-pre-wrap">
-            {post.content}
-          </p>
+          <p className="text-muted-foreground whitespace-pre-wrap">{post.content}</p>
         </CardContent>
       )}
     </Card>

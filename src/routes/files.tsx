@@ -1,4 +1,5 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useRef } from 'react'
 import {
   AlertDialog,
@@ -19,12 +20,15 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card'
-import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
-import { listFiles, deleteFile, type FileItem } from '~/server/files'
+
+type FileItem = {
+  key: string
+  size: number
+  uploaded: string
+  httpMetadata?: { contentType?: string }
+}
 
 export const Route = createFileRoute('/files')({
-  loader: () => listFiles(),
   component: FilesPage,
 })
 
@@ -48,12 +52,32 @@ function getFileIcon(contentType?: string): string {
 }
 
 function FilesPage() {
-  const files = Route.useLoaderData()
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
+
+  const { data: files = [], isLoading } = useQuery({
+    queryKey: ['files'],
+    queryFn: async () => {
+      const res = await fetch('/api/files/list')
+      if (!res.ok) throw new Error('Failed to load files')
+      return res.json() as Promise<FileItem[]>
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (key: string) => {
+      const res = await fetch(`/api/files/${encodeURIComponent(key)}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Failed to delete file')
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['files'] })
+    },
+  })
 
   const handleUpload = async (file: File) => {
     setIsUploading(true)
@@ -69,14 +93,16 @@ function FilesPage() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json() as { error?: string }
+        const errorData = (await response.json()) as { error?: string }
         throw new Error(errorData.error || 'Upload failed')
       }
 
       setUploadProgress('Upload complete!')
-      router.invalidate()
+      queryClient.invalidateQueries({ queryKey: ['files'] })
     } catch (error) {
-      setUploadProgress(`Error: ${error instanceof Error ? error.message : 'Upload failed'}`)
+      setUploadProgress(
+        `Error: ${error instanceof Error ? error.message : 'Upload failed'}`,
+      )
     } finally {
       setIsUploading(false)
       setTimeout(() => setUploadProgress(null), 3000)
@@ -85,9 +111,7 @@ function FilesPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      handleUpload(file)
-    }
+    if (file) handleUpload(file)
     e.target.value = ''
   }
 
@@ -95,26 +119,16 @@ function FilesPage() {
     e.preventDefault()
     setDragOver(false)
     const file = e.dataTransfer.files?.[0]
-    if (file) {
-      handleUpload(file)
-    }
-  }
-
-  const handleDelete = async (key: string) => {
-    await deleteFile({ data: key })
-    router.invalidate()
+    if (file) handleUpload(file)
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Files</h1>
-        <p className="text-muted-foreground">
-          Upload and manage files in R2 storage
-        </p>
+        <p className="text-muted-foreground">Upload and manage files in R2 storage</p>
       </div>
 
-      {/* Upload Area */}
       <Card>
         <CardHeader>
           <CardTitle>Upload File</CardTitle>
@@ -154,11 +168,11 @@ function FilesPage() {
                   {isUploading ? 'Uploading...' : 'Choose File'}
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground">
-                or drag and drop here
-              </p>
+              <p className="text-sm text-muted-foreground">or drag and drop here</p>
               {uploadProgress && (
-                <p className={`text-sm ${uploadProgress.startsWith('Error') ? 'text-destructive' : 'text-primary'}`}>
+                <p
+                  className={`text-sm ${uploadProgress.startsWith('Error') ? 'text-destructive' : 'text-primary'}`}
+                >
                   {uploadProgress}
                 </p>
               )}
@@ -167,23 +181,28 @@ function FilesPage() {
         </CardContent>
       </Card>
 
-      {/* File List */}
       <Card>
         <CardHeader>
           <CardTitle>Uploaded Files</CardTitle>
           <CardDescription>
-            {files.length} file{files.length !== 1 ? 's' : ''} in storage
+            {isLoading
+              ? 'Loading...'
+              : `${files.length} file${files.length !== 1 ? 's' : ''} in storage`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {files.length === 0 ? (
+          {files.length === 0 && !isLoading ? (
             <p className="text-center text-muted-foreground py-8">
               No files uploaded yet
             </p>
           ) : (
             <div className="divide-y">
               {files.map((file) => (
-                <FileRow key={file.key} file={file} onDelete={handleDelete} />
+                <FileRow
+                  key={file.key}
+                  file={file}
+                  onDelete={(key) => deleteMutation.mutate(key)}
+                />
               ))}
             </div>
           )}
@@ -198,7 +217,7 @@ function FileRow({
   onDelete,
 }: {
   file: FileItem
-  onDelete: (key: string) => Promise<void>
+  onDelete: (key: string) => void
 }) {
   const fileName = file.key.replace('uploads/', '').replace(/^\d+-/, '')
   const fileUrl = `/api/files/${encodeURIComponent(file.key)}`
@@ -219,7 +238,8 @@ function FileRow({
             {fileName}
           </a>
           <p className="text-sm text-muted-foreground">
-            {formatBytes(file.size)} • {new Date(file.uploaded).toLocaleDateString()}
+            {formatBytes(file.size)} •{' '}
+            {new Date(file.uploaded).toLocaleDateString()}
           </p>
         </div>
       </div>
@@ -239,8 +259,8 @@ function FileRow({
             <AlertDialogHeader>
               <AlertDialogTitle>Delete File</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{fileName}"? This action cannot
-                be undone.
+                Are you sure you want to delete "{fileName}"? This action cannot be
+                undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
