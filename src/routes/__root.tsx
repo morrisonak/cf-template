@@ -13,7 +13,6 @@ import * as React from 'react'
 import { useState } from 'react'
 import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
 import { NotFound } from '~/components/NotFound'
-import { UserNav } from '~/components/UserNav'
 import { ThemeProvider } from '~/components/theme-provider'
 import { ThemeToggle } from '~/components/theme-toggle'
 import { MobileNav } from '~/components/mobile-nav'
@@ -40,7 +39,7 @@ export const Route = createRootRoute({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       ...seo({
         title: 'CF Template | TanStack Start + Cloudflare',
-        description: 'A full-stack template with TanStack Start, Shadcn UI, Cloudflare Workers, D1, R2, KV, and Better Auth.',
+        description: 'A full-stack template with TanStack Start, Shadcn UI, Cloudflare Workers, D1, R2, and KV.',
       }),
     ],
     links: [

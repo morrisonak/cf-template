@@ -9,12 +9,22 @@ export type Post = {
   updated_at: string
 }
 
+function toPost(row: Post): Post {
+  return {
+    id: row.id,
+    title: row.title,
+    content: row.content,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }
+}
+
 export const getPosts = createServerFn({ method: 'GET' }).handler(async () => {
   const db = getDB()
   const result = await db
     .prepare('SELECT * FROM posts ORDER BY created_at DESC')
     .all<Post>()
-  return result.results
+  return result.results.map(toPost)
 })
 
 export const getPost = createServerFn({ method: 'GET' })
@@ -25,7 +35,7 @@ export const getPost = createServerFn({ method: 'GET' })
       .prepare('SELECT * FROM posts WHERE id = ?')
       .bind(id)
       .first<Post>()
-    return post
+    return post ? toPost(post) : null
   })
 
 export const createPost = createServerFn({ method: 'POST' })
@@ -38,7 +48,7 @@ export const createPost = createServerFn({ method: 'POST' })
       )
       .bind(data.title, data.content ?? null)
       .first<Post>()
-    return result
+    return result ? toPost(result) : null
   })
 
 export const updatePost = createServerFn({ method: 'POST' })
@@ -51,7 +61,7 @@ export const updatePost = createServerFn({ method: 'POST' })
       )
       .bind(data.title, data.content ?? null, data.id)
       .first<Post>()
-    return result
+    return result ? toPost(result) : null
   })
 
 export const deletePost = createServerFn({ method: 'POST' })

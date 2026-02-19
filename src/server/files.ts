@@ -18,7 +18,9 @@ export const listFiles = createServerFn({ method: 'GET' }).handler(async () => {
     key: obj.key,
     size: obj.size,
     uploaded: obj.uploaded.toISOString(),
-    httpMetadata: obj.httpMetadata,
+    httpMetadata: obj.httpMetadata
+      ? { contentType: obj.httpMetadata.contentType }
+      : undefined,
   }))
 })
 

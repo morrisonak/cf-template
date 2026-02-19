@@ -23,7 +23,6 @@ function About() {
           <li><strong>Database:</strong> Cloudflare D1 (SQLite)</li>
           <li><strong>Storage:</strong> Cloudflare R2</li>
           <li><strong>Cache:</strong> Cloudflare KV</li>
-          <li><strong>Auth:</strong> Better Auth (email/password)</li>
         </ul>
       </section>
 
@@ -33,8 +32,6 @@ function About() {
           <li><strong>Posts:</strong> Full CRUD with D1 database</li>
           <li><strong>Files:</strong> Drag-and-drop upload to R2</li>
           <li><strong>Settings:</strong> Key-value storage with KV</li>
-          <li><strong>Auth:</strong> Login, signup, and session management</li>
-          <li><strong>Dashboard:</strong> Authenticated overview with stats</li>
           <li><strong>Dark Mode:</strong> System-aware theme toggle</li>
         </ul>
       </section>

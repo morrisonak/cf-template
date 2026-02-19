@@ -15,7 +15,7 @@ function Home() {
             CF Template
           </h1>
           <p className="text-xl text-muted-foreground">
-            A full-stack template built with TanStack Start, Shadcn UI, and Cloudflare Workers. Includes D1 database, R2 storage, KV namespace, and Better Auth.
+            A full-stack template built with TanStack Start, Shadcn UI, and Cloudflare Workers. Includes D1 database, R2 storage, and KV namespace.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
@@ -47,10 +47,6 @@ function Home() {
           <FeatureCard
             title="KV Namespace"
             description="Key-value storage demo with TTL-based caching"
-          />
-          <FeatureCard
-            title="Better Auth"
-            description="Email/password authentication with session management"
           />
           <FeatureCard
             title="Shadcn UI"
