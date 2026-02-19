@@ -138,7 +138,7 @@ function SettingsPage() {
               No settings stored yet
             </p>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-border">
               {settings.map((setting) => (
                 <SettingRow
                   key={setting.key}
@@ -166,7 +166,7 @@ function SettingRow({
   return (
     <div className="flex items-center justify-between py-3 gap-4">
       <div className="min-w-0 flex-1">
-        <p className="font-mono text-sm font-medium">{setting.key}</p>
+        <p className="font-mono text-sm font-medium text-foreground">{setting.key}</p>
         <p className="text-sm text-muted-foreground truncate">{setting.value}</p>
       </div>
       <AlertDialog>
@@ -271,7 +271,7 @@ function CacheDemo() {
                 {cacheResult.fromCache ? 'FROM CACHE' : 'COMPUTED'}
               </span>
             </div>
-            <p className="font-mono text-sm break-all">{cacheResult.value}</p>
+            <p className="font-mono text-sm text-foreground break-all">{cacheResult.value}</p>
             <p className="text-xs text-muted-foreground">
               {cacheResult.fromCache
                 ? 'Value retrieved from KV cache. Click "Clear Cache" and fetch again to see a new computed value.'

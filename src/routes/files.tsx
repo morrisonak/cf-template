@@ -141,7 +141,7 @@ function FilesPage() {
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               dragOver
                 ? 'border-primary bg-primary/5'
-                : 'border-muted-foreground/25 hover:border-primary/50'
+                : 'border-border hover:border-primary/50'
             }`}
             onDragOver={(e) => {
               e.preventDefault()
@@ -196,7 +196,7 @@ function FilesPage() {
               No files uploaded yet
             </p>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-border">
               {files.map((file) => (
                 <FileRow
                   key={file.key}
@@ -233,7 +233,7 @@ function FileRow({
             href={fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium hover:underline truncate block"
+            className="font-medium text-foreground hover:underline truncate block"
           >
             {fileName}
           </a>
