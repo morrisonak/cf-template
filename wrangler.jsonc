@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "metavadvisors",
+	"name": "cf-template",
 	"compatibility_date": "2025-01-13",
 	"compatibility_flags": [
 		"nodejs_compat"
@@ -13,7 +13,7 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "metavadvisors-db",
+			"database_name": "cf-template-db",
 			"database_id": "8e0291d7-4d7c-4328-b1ad-55bc5db6f22b",
 			"migrations_dir": "migrations"
 		}
@@ -22,7 +22,7 @@
 	"r2_buckets": [
 		{
 			"binding": "BUCKET",
-			"bucket_name": "metavadvisors-bucket"
+			"bucket_name": "cf-template-bucket"
 		}
 	],
 	// KV Namespace binding
@@ -35,6 +35,6 @@
 	// Environment variables
 	"vars": {
 		"ENVIRONMENT": "development",
-		"DOMAIN": "metavadvisors.com"
+		"DOMAIN": "cf-template.jmorrison.workers.dev"
 	}
 }

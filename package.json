@@ -1,5 +1,5 @@
 {
-  "name": "metavadvisors",
+  "name": "cf-template",
   "private": true,
   "sideEffects": false,
   "type": "module",

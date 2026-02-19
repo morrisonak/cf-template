@@ -23,7 +23,7 @@ import { seo } from '~/utils/seo'
 // Script to prevent flash of unstyled content
 const themeScript = `
   (function() {
-    const stored = localStorage.getItem('metavadvisors-theme');
+    const stored = localStorage.getItem('cf-template-theme');
     const theme = stored || 'system';
     const root = document.documentElement;
 
@@ -39,8 +39,8 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       ...seo({
-        title: 'MetaV Advisors | Custom AI Agents for Revenue Growth',
-        description: 'We design and deploy intelligent AI agents tailored to your business. Automate workflows, accelerate revenue, scale with zero technical overhead.',
+        title: 'CF Template | TanStack Start + Cloudflare',
+        description: 'A full-stack template with TanStack Start, Shadcn UI, Cloudflare Workers, D1, R2, KV, and Better Auth.',
       }),
     ],
     links: [
@@ -73,7 +73,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="metavadvisors-theme">
+      <ThemeProvider defaultTheme="system" storageKey="cf-template-theme">
         <RootDocument>
           <Outlet />
         </RootDocument>
@@ -98,22 +98,29 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               activeProps={{ className: 'text-primary' }}
               activeOptions={{ exact: true }}
             >
-              MetaV Advisors
+              CF Template
             </Link>
             <div className="hidden md:flex gap-6 text-sm">
               <Link
-                to="/services"
+                to="/posts"
                 className="hover:text-primary"
                 activeProps={{ className: 'text-primary' }}
               >
-                Services
+                Posts
               </Link>
               <Link
-                to="/roi-calculator"
+                to="/files"
                 className="hover:text-primary"
                 activeProps={{ className: 'text-primary' }}
               >
-                ROI Calculator
+                Files
+              </Link>
+              <Link
+                to="/settings"
+                className="hover:text-primary"
+                activeProps={{ className: 'text-primary' }}
+              >
+                Settings
               </Link>
               <Link
                 to="/about"
@@ -121,27 +128,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 activeProps={{ className: 'text-primary' }}
               >
                 About
-              </Link>
-              <Link
-                to="/contact"
-                className="hover:text-primary"
-                activeProps={{ className: 'text-primary' }}
-              >
-                Contact
-              </Link>
-              <Link
-                to="/marketing-plan"
-                className="hover:text-primary"
-                activeProps={{ className: 'text-primary' }}
-              >
-                Marketing Plan
-              </Link>
-              <Link
-                to="/business-plan"
-                className="hover:text-primary"
-                activeProps={{ className: 'text-primary' }}
-              >
-                Business Plan
               </Link>
             </div>
             <div className="flex items-center gap-2">

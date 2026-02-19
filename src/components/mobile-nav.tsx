@@ -21,18 +21,25 @@ export function MobileNav() {
         <div className="absolute top-16 left-0 right-0 bg-background border-b border-border shadow-lg z-50">
           <nav className="flex flex-col p-4 space-y-3">
             <Link
-              to="/services"
+              to="/posts"
               onClick={() => setOpen(false)}
               className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
             >
-              Services
+              Posts
             </Link>
             <Link
-              to="/roi-calculator"
+              to="/files"
               onClick={() => setOpen(false)}
               className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
             >
-              ROI Calculator
+              Files
+            </Link>
+            <Link
+              to="/settings"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+            >
+              Settings
             </Link>
             <Link
               to="/about"
@@ -40,27 +47,6 @@ export function MobileNav() {
               className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
             >
               About
-            </Link>
-            <Link
-              to="/contact"
-              onClick={() => setOpen(false)}
-              className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-            >
-              Contact
-            </Link>
-            <Link
-              to="/marketing-plan"
-              onClick={() => setOpen(false)}
-              className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-            >
-              Marketing Plan
-            </Link>
-            <Link
-              to="/business-plan"
-              onClick={() => setOpen(false)}
-              className="px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-            >
-              Business Plan
             </Link>
           </nav>
         </div>
