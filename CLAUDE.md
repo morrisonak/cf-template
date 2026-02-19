@@ -23,7 +23,7 @@ bun run db:studio        # Open D1 Studio for local DB
 
 ## Architecture
 
-**Stack:** TanStack Start + Shadcn UI + Cloudflare Workers + D1 + R2 + KV + Better Auth
+**Stack:** TanStack Start + TanStack Query + Shadcn UI + Cloudflare Workers + D1 + R2 + KV
 
 ### Project Structure
 ```
@@ -32,27 +32,23 @@ src/
 │   ├── __root.tsx        # Root layout with nav
 │   ├── index.tsx         # Home page
 │   ├── about.tsx         # About page
-│   ├── posts.tsx         # Posts CRUD demo (D1)
-│   ├── files.tsx         # File management (R2)
-│   ├── settings.tsx      # KV settings demo
-│   ├── login.tsx         # Login page
-│   ├── signup.tsx        # Signup page
+│   ├── posts.tsx         # Posts CRUD UI (D1)
+│   ├── files.tsx         # File management UI (R2)
+│   ├── settings.tsx      # KV settings + cache demo UI
 │   └── api/
-│       ├── auth.$.ts         # Better Auth handler
+│       ├── posts.ts          # Posts REST API (GET, POST, PUT, DELETE)
+│       ├── settings.ts       # Settings REST API (GET, POST, DELETE)
+│       ├── cache.$.ts        # Cache API with splat param
+│       ├── files.list.ts     # File listing endpoint
 │       ├── files.upload.ts   # File upload endpoint
-│       └── files.$.ts        # File serving endpoint
-├── server/
-│   ├── posts.ts          # Posts server functions
-│   ├── files.ts          # Files server functions
-│   └── settings.ts       # KV settings server functions
+│       └── files.$.ts        # File serving/delete endpoint
 ├── components/
 │   ├── ui/               # Shadcn UI components
+│   ├── mobile-nav.tsx
 │   ├── DefaultCatchBoundary.tsx
 │   └── NotFound.tsx
 ├── lib/
-│   ├── utils.ts          # cn() utility
-│   ├── auth.ts           # Better Auth server config
-│   └── auth-client.ts    # Better Auth client
+│   └── utils.ts          # cn() utility
 ├── styles/app.css        # Tailwind v4 theme
 └── utils/
     ├── cloudflare.ts     # getDB(), getBucket(), getKV()
@@ -60,36 +56,10 @@ src/
 migrations/               # D1 SQL migrations
 ```
 
-## Server Functions
+## API Routes
 
-Use `createServerFn` for RPC-style server functions:
-```ts
-import { createServerFn } from '@tanstack/react-start'
-import { getDB } from '~/utils/cloudflare'
+Use `createFileRoute` with `server.handlers` for REST endpoints. Page components use `fetch()` + TanStack Query (`useQuery`/`useMutation`) to call these.
 
-export const getPosts = createServerFn({ method: 'GET' }).handler(async () => {
-  const db = getDB()
-  const result = await db.prepare('SELECT * FROM posts').all()
-  return result.results
-})
-
-export const createPost = createServerFn({ method: 'POST' })
-  .inputValidator((data: { title: string; content?: string }) => data)
-  .handler(async ({ data }) => {
-    const db = getDB()
-    return await db.prepare('INSERT INTO posts ...').bind(data.title).first()
-  })
-```
-
-Call from components:
-```ts
-const posts = await getPosts()
-await createPost({ data: { title: 'Hello', content: 'World' } })
-```
-
-## Server Routes (API)
-
-Use `createFileRoute` with `server.handlers` for REST endpoints:
 ```ts
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -103,6 +73,66 @@ export const Route = createFileRoute('/api/example')({
       },
     },
   },
+})
+```
+
+### Important: Avoid parent-child route nesting for API routes
+
+TanStack Router treats a route with children as a layout route, which breaks `server.handlers` (returns HTML instead of JSON). **Do NOT create child routes under API routes that have handlers.**
+
+Bad (broken):
+```
+api/posts.ts    ← parent, server.handlers won't fire
+api/posts.$.ts  ← child, creates parent-child nesting
+```
+
+Good (working):
+```
+api/posts.ts    ← leaf route, all handlers (GET/POST/PUT/DELETE) in one file
+```
+
+For operations on individual resources, pass IDs via request body (PUT) or query params (DELETE) instead of path segments:
+```ts
+// DELETE with query param
+DELETE: async ({ request }) => {
+  const url = new URL(request.url)
+  const id = url.searchParams.get('id')
+  // ...
+}
+
+// PUT with ID in body
+PUT: async ({ request }) => {
+  const { id, title } = await request.json()
+  // ...
+}
+```
+
+### Client-side data fetching (TanStack Query)
+
+```ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+// Fetch data
+const { data, isLoading } = useQuery({
+  queryKey: ['posts'],
+  queryFn: async () => {
+    const res = await fetch('/api/posts')
+    if (!res.ok) throw new Error('Failed to load')
+    return res.json() as Promise<Post[]>
+  },
+})
+
+// Mutate data
+const mutation = useMutation({
+  mutationFn: async (data: { title: string }) => {
+    const res = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) throw new Error('Failed to create')
+  },
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['posts'] }),
 })
 ```
 
@@ -135,50 +165,6 @@ const list = await kv.list({ prefix: 'setting:' })
 
 Types auto-generated in `worker-configuration.d.ts` - run `bun run cf-typegen` after changing `wrangler.jsonc`.
 
-## Authentication (Better Auth)
-
-Uses [Better Auth](https://better-auth.com) with email/password authentication.
-
-### Server Setup (`~/lib/auth.ts`)
-```ts
-import { getAuth } from '~/lib/auth'
-
-// In API route handler
-export const Route = createFileRoute('/api/auth/$')({
-  server: {
-    handlers: {
-      GET: ({ request }) => getAuth().handler(request),
-      POST: ({ request }) => getAuth().handler(request),
-    },
-  },
-})
-```
-
-### Client Usage (`~/lib/auth-client.ts`)
-```ts
-import { signIn, signUp, signOut, useSession } from '~/lib/auth-client'
-
-// Sign up
-await signUp.email({ name, email, password })
-
-// Sign in
-await signIn.email({ email, password })
-
-// Sign out
-await signOut()
-
-// Get session (React hook)
-const { data: session, isPending } = useSession()
-if (session?.user) {
-  console.log(session.user.name, session.user.email)
-}
-```
-
-### Auth Routes
-- `/login` - Login page
-- `/signup` - Registration page
-- `/api/auth/*` - Better Auth API endpoints
-
 ## Shadcn UI Components
 
 Available in `src/components/ui/`:
@@ -198,8 +184,8 @@ bunx shadcn@latest add [component]
 
 ### Posts CRUD (`/posts`)
 - List, create, edit, delete posts
-- Server functions with D1 database
-- Form handling with validation
+- API routes with D1 database
+- TanStack Query for data fetching
 
 ### File Management (`/files`)
 - Drag & drop upload to R2
@@ -212,12 +198,6 @@ bunx shadcn@latest add [component]
 - Add, view, delete settings
 - Cache demo with 60-second TTL
 - Demonstrates KV as cache layer
-
-### Authentication (`/login`, `/signup`)
-- Email/password authentication
-- User registration with validation
-- Session management with cookies
-- Protected route support
 
 ## Cloudflare Setup
 
@@ -232,17 +212,12 @@ bunx shadcn@latest add [component]
 
 2. Update `wrangler.jsonc` with D1 `database_id` and KV namespace `id` from the output above
 
-3. Set auth secret:
-   ```bash
-   openssl rand -base64 32 | bunx wrangler secret put BETTER_AUTH_SECRET
-   ```
-
-4. Run migrations:
+3. Run migrations:
    ```bash
    bun run db:migrate:prod
    ```
 
-5. Deploy:
+4. Deploy:
    ```bash
    bun run deploy
    ```
