@@ -60,13 +60,13 @@ function Contact() {
       {/* Form */}
       <section className="rounded-lg border bg-card p-8">
         {submitted && (
-          <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800">
+          <div className="mb-6 p-4 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200">
             ✓ Thank you! We'll be in touch soon.
           </div>
         )}
 
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800">
+          <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200">
             {error}
           </div>
         )}
@@ -80,7 +80,7 @@ function Contact() {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               {...register('name', { required: 'Name is required' })}
             />
-            {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+            {errors.name && <p className="text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -97,7 +97,7 @@ function Contact() {
                 }
               })}
             />
-            {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
+            {errors.email && <p className="text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -108,7 +108,7 @@ function Contact() {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               {...register('company', { required: 'Company is required' })}
             />
-            {errors.company && <p className="text-sm text-red-600">{errors.company.message}</p>}
+            {errors.company && <p className="text-sm text-red-600 dark:text-red-400">{errors.company.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -119,7 +119,7 @@ function Contact() {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               {...register('message', { required: 'Message is required' })}
             />
-            {errors.message && <p className="text-sm text-red-600">{errors.message.message}</p>}
+            {errors.message && <p className="text-sm text-red-600 dark:text-red-400">{errors.message.message}</p>}
           </div>
 
           <Button 

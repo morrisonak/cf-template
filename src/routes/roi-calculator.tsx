@@ -231,7 +231,7 @@ function ROICalculator() {
                     <div key={year} className="grid gap-2 p-3 border rounded-lg">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold">Year {year}</span>
-                        <span className={yearProfit > 0 ? 'text-green-600' : 'text-red-600'}>
+                        <span className={yearProfit > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                           {yearProfit > 0 ? '+' : ''} ${yearProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                         </span>
                       </div>
@@ -301,11 +301,11 @@ function MetricBox({
   color: 'green' | 'blue' | 'yellow' | 'orange' | 'red'
 }) {
   const colors = {
-    green: 'bg-green-50 border-green-200 text-green-900',
-    blue: 'bg-blue-50 border-blue-200 text-blue-900',
-    yellow: 'bg-yellow-50 border-yellow-200 text-yellow-900',
-    orange: 'bg-orange-50 border-orange-200 text-orange-900',
-    red: 'bg-red-50 border-red-200 text-red-900',
+    green: 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-900 dark:text-green-100',
+    blue: 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100',
+    yellow: 'bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-100',
+    orange: 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-100',
+    red: 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-900 dark:text-red-100',
   }
 
   return (

@@ -185,7 +185,7 @@ function BusinessPlan() {
 
         <div className="space-y-4">
           {tierAnalysis.map((tier) => (
-            <Card key={tier.name} className="border-green-200">
+            <Card key={tier.name} className="border-green-200 dark:border-green-800">
               <CardHeader>
                 <CardTitle className="text-lg">{tier.name}</CardTitle>
               </CardHeader>
@@ -204,7 +204,7 @@ function BusinessPlan() {
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs">YOUR PROFIT</p>
-                      <p className="text-2xl font-bold text-green-600">${Math.round(tier.upfrontProfit).toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">${Math.round(tier.upfrontProfit).toLocaleString()}</p>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">{tier.upfrontMarginPct}% margin on ${tier.upfrontPrice.toLocaleString()} sale</p>
@@ -223,7 +223,7 @@ function BusinessPlan() {
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs">PROFIT /MONTH</p>
-                      <p className="text-2xl font-bold text-green-600">${Math.round(tier.monthlyProfit).toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">${Math.round(tier.monthlyProfit).toLocaleString()}</p>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">{tier.monthlyMarginPct}% margin (API + infra costs covered)</p>
@@ -240,11 +240,11 @@ function BusinessPlan() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Your total profit</span>
-                    <span className="font-bold text-green-600">${Math.round(tier.annualTotalProfit).toLocaleString()}</span>
+                    <span className="font-bold text-green-600 dark:text-green-400">${Math.round(tier.annualTotalProfit).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm font-semibold">
                     <span>Blended margin</span>
-                    <span className="text-green-600">{((tier.annualTotalProfit / tier.annualRevenue) * 100).toFixed(1)}%</span>
+                    <span className="text-green-600 dark:text-green-400">{((tier.annualTotalProfit / tier.annualRevenue) * 100).toFixed(1)}%</span>
                   </div>
                 </div>
               </CardContent>
@@ -262,7 +262,7 @@ function BusinessPlan() {
           </p>
         </div>
 
-        <Card className="border-orange-200">
+        <Card className="border-orange-200 dark:border-orange-800">
           <CardContent className="pt-6">
             <div className="space-y-3">
               <div className="space-y-2 text-sm">
@@ -282,15 +282,15 @@ function BusinessPlan() {
               <div className="border-t pt-3 space-y-2">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total MRR (Gross Revenue)</span>
-                  <span className="text-orange-600">${portfolioMRR.toLocaleString()}/mo</span>
+                  <span className="text-orange-600 dark:text-orange-400">${portfolioMRR.toLocaleString()}/mo</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg">
                   <span>Monthly Profit (after API + Infra)</span>
-                  <span className="text-green-600">${Math.round(portfolioMonthlyProfit).toLocaleString()}/mo</span>
+                  <span className="text-green-600 dark:text-green-400">${Math.round(portfolioMonthlyProfit).toLocaleString()}/mo</span>
                 </div>
                 <div className="flex justify-between font-bold text-base">
                   <span>Annual Recurring Profit</span>
-                  <span className="text-green-600">${Math.round(portfolioMonthlyProfit * 12).toLocaleString()}/yr</span>
+                  <span className="text-green-600 dark:text-green-400">${Math.round(portfolioMonthlyProfit * 12).toLocaleString()}/yr</span>
                 </div>
               </div>
             </div>
@@ -305,15 +305,15 @@ function BusinessPlan() {
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Starter agents</span>
-              <span className="font-bold text-green-600">$1,800 profit each</span>
+              <span className="font-bold text-green-600 dark:text-green-400">$1,800 profit each</span>
             </div>
             <div className="flex justify-between">
               <span>Growth agents</span>
-              <span className="font-bold text-green-600">$4,800 profit each</span>
+              <span className="font-bold text-green-600 dark:text-green-400">$4,800 profit each</span>
             </div>
             <div className="flex justify-between">
               <span>Enterprise agents</span>
-              <span className="font-bold text-green-600">$9,000 profit each</span>
+              <span className="font-bold text-green-600 dark:text-green-400">$9,000 profit each</span>
             </div>
           </CardContent>
         </Card>
@@ -350,7 +350,7 @@ function BusinessPlan() {
           </CardContent>
         </Card>
 
-        <Card className="border-yellow-200">
+        <Card className="border-yellow-200 dark:border-yellow-800">
           <CardHeader>
             <CardTitle className="text-lg">⚠️ Important: Monthly Fees Must Cover API</CardTitle>
           </CardHeader>
@@ -373,7 +373,7 @@ function BusinessPlan() {
           <h2 className="text-2xl font-bold">Hosting Strategy & Recommendation</h2>
         </div>
 
-        <Card className="border-purple-200">
+        <Card className="border-purple-200 dark:border-purple-800">
           <CardHeader>
             <CardTitle className="text-lg">Cloudflare: Official Standard for All Web Hosting</CardTitle>
             <CardDescription>
@@ -411,7 +411,7 @@ function BusinessPlan() {
           </CardContent>
         </Card>
 
-        <Card className="border-green-200 bg-green-50/50">
+        <Card className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/50">
           <CardHeader>
             <CardTitle className="text-lg">Official Hosting Strategy: Cloudflare Only</CardTitle>
           </CardHeader>
@@ -436,7 +436,7 @@ function BusinessPlan() {
           </p>
         </div>
 
-        <Card className="border-green-200">
+        <Card className="border-green-200 dark:border-green-800">
           <CardHeader>
             <CardTitle className="text-lg">Pricing & Margins by Tier</CardTitle>
           </CardHeader>
@@ -445,22 +445,22 @@ function BusinessPlan() {
               <div>
                 <p className="font-bold">Starter: $3,000 + $200/mo</p>
                 <div className="grid grid-cols-2 gap-2 mt-1 ml-2">
-                  <div>Upfront Profit: <span className="font-bold text-green-600">$1,800 (60%)</span></div>
-                  <div>Monthly Profit: <span className="font-bold text-green-600">$150 (75%)</span></div>
+                  <div>Upfront Profit: <span className="font-bold text-green-600 dark:text-green-400">$1,800 (60%)</span></div>
+                  <div>Monthly Profit: <span className="font-bold text-green-600 dark:text-green-400">$150 (75%)</span></div>
                 </div>
               </div>
               <div>
                 <p className="font-bold">Growth: $8,000 + $500/mo</p>
                 <div className="grid grid-cols-2 gap-2 mt-1 ml-2">
-                  <div>Upfront Profit: <span className="font-bold text-green-600">$4,800 (60%)</span></div>
-                  <div>Monthly Profit: <span className="font-bold text-green-600">$375 (75%)</span></div>
+                  <div>Upfront Profit: <span className="font-bold text-green-600 dark:text-green-400">$4,800 (60%)</span></div>
+                  <div>Monthly Profit: <span className="font-bold text-green-600 dark:text-green-400">$375 (75%)</span></div>
                 </div>
               </div>
               <div>
                 <p className="font-bold">Enterprise: $15,000+ + $1,000+/mo</p>
                 <div className="grid grid-cols-2 gap-2 mt-1 ml-2">
-                  <div>Upfront Profit: <span className="font-bold text-green-600">$9,000 (60%)</span></div>
-                  <div>Monthly Profit: <span className="font-bold text-green-600">$750+ (75%)</span></div>
+                  <div>Upfront Profit: <span className="font-bold text-green-600 dark:text-green-400">$9,000 (60%)</span></div>
+                  <div>Monthly Profit: <span className="font-bold text-green-600 dark:text-green-400">$750+ (75%)</span></div>
                 </div>
               </div>
             </div>

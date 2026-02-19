@@ -273,8 +273,8 @@ function CacheDemo() {
               <span
                 className={`px-2 py-1 rounded text-xs font-medium ${
                   cacheResult.fromCache
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-blue-100 text-blue-800'
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                    : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
                 }`}
               >
                 {cacheResult.fromCache ? 'FROM CACHE' : 'COMPUTED'}
