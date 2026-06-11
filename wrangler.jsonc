@@ -10,6 +10,8 @@
 		"enabled": true
 	},
 	// D1 Database binding
+	// Replace database_name and database_id with the output of:
+	//   wrangler d1 create <your-db-name>
 	"d1_databases": [
 		{
 			"binding": "DB",
@@ -19,6 +21,7 @@
 		}
 	],
 	// R2 Storage binding
+	// Replace bucket_name with the output of: wrangler r2 bucket create <your-bucket>
 	"r2_buckets": [
 		{
 			"binding": "BUCKET",
@@ -26,6 +29,7 @@
 		}
 	],
 	// KV Namespace binding
+	// Replace id with the output of: wrangler kv namespace create KV
 	"kv_namespaces": [
 		{
 			"binding": "KV",
