@@ -13,8 +13,8 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "cf-template-db",
-			"database_id": "375610de-221f-4814-ace1-5b4d71491eb6",
+			"database_name": "cf-template-db-dedicated",
+			"database_id": "ddc26518-78af-46d4-9dee-a4a853c393ce",
 			"migrations_dir": "migrations"
 		}
 	],
