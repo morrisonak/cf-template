@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Development
 bun install              # Install dependencies
-bun run dev              # Start dev server on port 3000
+bun run dev              # Start dev server on port 3000 (Vite picks the next free port if 3000 is taken — check the terminal output)
 bun run build            # Build for production
 bun run preview          # Build and preview locally
 
@@ -199,9 +199,17 @@ bunx shadcn@latest add [component]
 - Cache demo with 60-second TTL
 - Demonstrates KV as cache layer
 
+## CI/CD
+
+`.github/workflows/ci.yml` builds every push/PR; on pushes to `main` it also applies D1 migrations and deploys to Cloudflare Workers. Requires two repo secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+
+Migrations are applied **by binding name** (`wrangler d1 migrations apply DB`), so they always follow whatever database `wrangler.jsonc` points at.
+
 ## Cloudflare Setup
 
 > **Gotcha:** If Wrangler gives a 400 Bad Request on the `/memberships` endpoint, it means the API token lacks account-level permissions. The fix is to add the `database_id` (and KV `id`, etc.) directly in `wrangler.jsonc` so Wrangler skips the account lookup entirely. Always grab the IDs from the `wrangler d1 create` / `wrangler kv namespace create` output and add them to the config immediately.
+
+> **Gotcha:** The deployed Worker binds D1 by `database_id`, not `database_name`. If the ID belongs to a different database than the name suggests, migrations succeed (they resolve by name/binding) while the live Worker queries the wrong database — API routes 500 in production even though CI is green. When debugging prod-only D1 errors, verify the `database_id` first.
 
 1. Create resources:
    ```bash
